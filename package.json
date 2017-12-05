@@ -1,0 +1,61 @@
+{
+  "name": "gulp-webrequire-promise",
+  "main": "build/server/index",
+  "typings": "build/server/index",
+  "description": "Create promises for events.",
+  "version": "0.0.6",
+  "scripts": {
+    "start": "z1 start",
+    "restart": "yarn build && z1 restart && z1 logs",
+    "build": "gulp typescript",
+    "build-test": "gulp test",
+    "test": "yarn build && yarn build-test && ./node_modules/mocha/bin/_mocha build/test"
+  },
+  "engines": {
+    "node": ">=7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robojones/gulp-webrequire.git"
+  },
+  "keywords": [
+    "promise",
+    "event",
+    "events",
+    "promises",
+    "create"
+  ],
+  "tonicExampleFilename": "example.js",
+  "author": "robojones",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/robojones/gulp-webrequire/issues"
+  },
+  "homepage": "https://github.com/robojones/gulp-webrequire#readme",
+  "devDependencies": {
+    "@types/esprima": "^4.0.1",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.57",
+    "codeclimate-test-reporter": "^0.5.0",
+    "command-test": "^1.1.1",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.2.3",
+    "gulp-util": "^3.0.8",
+    "mocha": "^4.0.1",
+    "pump": "^2.0.0",
+    "source-map-support": "^0.5.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1",
+    "gulp-minify": "^2.1.0",
+    "gulp-uglify": "^3.0.0",
+    "merge2": "^1.2.0",
+    "@types/gulp": "^4.0.5",
+    "@types/gulp-util": "^3.0.34",
+    "@types/mz": "^0.0.32"
+  },
+  "dependencies": {
+    "esprima": "^4.0.0",
+    "mz": "^2.7.0",
+    "vinyl": "^2.1.0"
+  }
+}
