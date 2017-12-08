@@ -1,6 +1,6 @@
 # gulp-webrequire
 
-Use require in the browser with thie gulp module.
+Use require in the browser with this gulp module.
 
 [![CircleCI](https://circleci.com/gh/robojones/gulp-webrequire.svg?style=shield)](https://circleci.com/gh/robojones/gulp-webrequire)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
