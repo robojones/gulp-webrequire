@@ -15,8 +15,6 @@
   ) {
     let queue = requirements.map(r => r[1])
 
-    console.log(`queue for module "${name}:`, queue)
-
     requirements.forEach(([localName, realPath]) => {
       if (cache[realPath]) {
         removeFromQueue(realPath)
@@ -37,8 +35,6 @@
 
     /** Tries to execute the module. Aborts if not all requirements are met. */
     function trigger () {
-      console.log(`TRIGGER - queue for module "${name}:`, queue)
-
       if (!queue.length) {
         execute()
       }
@@ -51,8 +47,6 @@
       }
 
       contents(module, module.exports, localRequire)
-
-      console.log('file', name, 'exported', module.exports)
 
       resolve(module)
     }
@@ -78,8 +72,6 @@
     /** Resolves the current module. Adds the exported data to the cache. */
     function resolve (module: { exports: any }) {
       cache[name] = module.exports
-
-      console.log('cache', cache)
 
       if (callbacks[name]) {
         callbacks[name].forEach(cb => cb())

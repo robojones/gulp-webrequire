@@ -45,8 +45,6 @@ class Parser extends EventEmitter {
   private async import (fileHandle: File): Promise<Vinyl> {
     const finalPath = fileHandle.finalPath
 
-    gutil.log('#### 1')
-
     if (this.history.includes(finalPath)) {
       return
     }
@@ -58,8 +56,6 @@ class Parser extends EventEmitter {
       gutil.log(`WARNING (gulp-webrequire): The internal module ${originalPath} will not be available in the browser!`)
       return // is internal module
     }
-
-    gutil.log('import', originalPath)
 
     const stat = await fs.stat(originalPath)
     const contents = await fs.readFile(originalPath)
@@ -87,7 +83,6 @@ class Parser extends EventEmitter {
   }
 
   private wrap (requirements: File[], file: Vinyl) {
-    gutil.log(file.path, file.base)
     const name = file.path.substr(file.base.length)
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
     const prefix = Buffer.from(

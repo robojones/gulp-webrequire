@@ -25,8 +25,6 @@ export default class File {
       })
     }
 
-    gutil.log(origin.base)
-
     this.cwd = origin.cwd
     this.base = origin.base
     this.mention = mention
