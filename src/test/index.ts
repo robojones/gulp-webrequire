@@ -1,11 +1,11 @@
 import * as assert from 'assert'
 import * as command from 'command-test'
 
-(global as any).assert = assert
+const g = (global as any)
 
 describe('gulp-webrequire', () => {
   before(() => {
-    (global as any).window = {}
+    g.window = {}
   })
 
   it('should work', function (cb) {
@@ -19,11 +19,8 @@ describe('gulp-webrequire', () => {
     require('../test-resources/another-file')
     require('../test-resources/module/jquery')
 
-    global.window.registerModule([['./main.js', '/main.js']], 'hi', (module, exports, require) => {
-      console.log('THE END!')
+    g.window.registerModule([['./main.js', '/main.js']], 'hi', (module, exports, require) => {
       cb()
     })
-
-    console.log('done')
   })
 })
