@@ -11,8 +11,6 @@ dependencies:
 test:
   override:
     - yarn test
-  post:
-    - node_modules/codeclimate-test-reporter/bin/codeclimate.js < coverage/lcov.info
 
 deployment:
   npm:
