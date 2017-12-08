@@ -1,8 +1,8 @@
 {
-  "name": "gulp-webrequire-promise",
+  "name": "gulp-webrequire",
   "main": "build/server/index",
   "typings": "build/server/index",
-  "description": "Create promises for events.",
+  "description": "Use require in the browser with thie gulp module.",
   "version": "0.0.1",
   "scripts": {
     "build": "gulp typescript",
@@ -17,11 +17,12 @@
     "url": "git+https://github.com/robojones/gulp-webrequire.git"
   },
   "keywords": [
-    "promise",
-    "event",
-    "events",
-    "promises",
-    "create"
+    "gulp",
+    "browser",
+    "require",
+    "module",
+    "web",
+    "export"
   ],
   "tonicExampleFilename": "example.js",
   "author": "robojones",
