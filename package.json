@@ -36,8 +36,6 @@
     "@types/esprima": "^4.0.1",
     "@types/mocha": "^2.2.44",
     "@types/node": "^8.0.57",
-    "codeclimate-test-reporter": "^0.5.0",
-    "command-test": "^1.1.1",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.3",
     "gulp-util": "^3.0.8",
