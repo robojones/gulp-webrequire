@@ -3,7 +3,7 @@
   "main": "build/server/index",
   "typings": "build/server/index",
   "description": "Create promises for events.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "build": "gulp typescript",
     "build-test": "gulp test",
