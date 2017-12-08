@@ -1,5 +1,4 @@
 import * as assert from 'assert'
-import * as command from 'command-test'
 
 const g = (global as any)
 
