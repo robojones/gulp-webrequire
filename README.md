@@ -57,9 +57,9 @@ In your `gulpfile.json`:
 const webrequire = require('gulp-webrequire').default
 
 gulp.task('typescript-test-resources', function () {
-  return gulp.src('src/test-resources/**/*.ts')
+  return gulp.src('src/**/*.js')
     .pipe(webRequire())
-    .pipe(gulp.dest('build/test-resources'))
+    .pipe(gulp.dest('build/'))
 })
 ```
 
