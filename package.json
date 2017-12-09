@@ -4,6 +4,9 @@
   "typings": "build/server/index",
   "description": "Use require in the browser with thie gulp module.",
   "version": "0.0.1",
+  "bin": {
+    "webrequire": "build/cli/index.js"
+  },
   "scripts": {
     "build": "gulp typescript",
     "build-test": "gulp test",
@@ -51,6 +54,8 @@
     "typescript": "^2.6.1"
   },
   "dependencies": {
+    "@types/commander": "^2.12.2",
+    "commander": "^2.12.2",
     "esprima": "^4.0.0",
     "mz": "^2.7.0",
     "vinyl": "^2.1.0"

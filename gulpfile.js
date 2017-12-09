@@ -33,6 +33,19 @@ gulp.task('typescript-server', function () {
   ])
 })
 
+const cliTS = ts.createProject(TS_SETTINGS)
+
+gulp.task('typescript-cli', function () {
+
+  const tsResult = gulp.src(['src/cli/**/*.ts'])
+    .pipe(cliTS())
+
+  return merge([
+    tsResult.dts.pipe(gulp.dest('build/cli')),
+    tsResult.js.pipe(gulp.dest('build/cli'))
+  ])
+})
+
 const browserTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
   target: 'es6',
   lib: ['esnext', 'dom']
@@ -85,8 +98,9 @@ gulp.task('typescript-test-resources', function () {
 gulp.task('typescript-watch', function () {
   gulp.watch('src/server/**/*.ts', ['typescript-server'])
   gulp.watch('src/browser/**/*.ts', ['typescript-browser'])
+  gulp.watch('src/cli/**/*.ts', ['typescript-cli'])
 })
 
-gulp.task('typescript', ['typescript-server', 'typescript-browser'])
+gulp.task('typescript', ['typescript-server', 'typescript-browser', 'typescript-cli'])
 gulp.task('test', ['typescript-test', 'typescript-test-resources'])
 gulp.task('default', ['typescript', 'typescript-watch'])
