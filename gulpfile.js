@@ -99,8 +99,10 @@ gulp.task('typescript-watch', function () {
   gulp.watch('src/server/**/*.ts', ['typescript-server'])
   gulp.watch('src/browser/**/*.ts', ['typescript-browser'])
   gulp.watch('src/cli/**/*.ts', ['typescript-cli'])
+  gulp.watch('src/test/**/*.ts', ['typescript-test'])
+  gulp.watch('src/test-resources/**/*.ts', ['typescript-test-resources'])
 })
 
 gulp.task('typescript', ['typescript-server', 'typescript-browser', 'typescript-cli'])
 gulp.task('test', ['typescript-test', 'typescript-test-resources'])
-gulp.task('default', ['typescript', 'typescript-watch'])
+gulp.task('default', ['typescript', 'test', 'typescript-watch'])
