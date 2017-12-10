@@ -17,7 +17,7 @@ tslint.json
 gulpfile.js
 
 # ci
-cirecle.yml
+circle.yml
 
 # misc
 .directory
