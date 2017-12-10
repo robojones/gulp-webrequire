@@ -20,6 +20,7 @@
     "url": "git+https://github.com/robojones/gulp-webrequire.git"
   },
   "keywords": [
+    "gulpplugin",
     "gulp",
     "browser",
     "require",
