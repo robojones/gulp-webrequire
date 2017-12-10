@@ -3,11 +3,8 @@ import { Transform } from 'stream'
 import * as Vinyl from 'vinyl'
 import Parser from './Parser'
 
-export interface ParserOptions {
-  none: void
-}
-
-export function webRequire (options) {
+/** Use require in the browser with this gulp plugin. */
+export function webRequire (options): Transform {
   const parser = new Parser()
 
   function transform (chunk, enc, cb) {
