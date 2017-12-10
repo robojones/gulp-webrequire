@@ -5,6 +5,12 @@ Use require in the browser with this gulp plugin.
 [![CircleCI](https://circleci.com/gh/robojones/gulp-webrequire.svg?style=shield)](https://circleci.com/gh/robojones/gulp-webrequire)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Installation
+
+```
+npm install gulp-webrequire
+```
+
 ## How it works
 
 The difference between this plugin and other solution like webpack is, that it does not create a single .js file containing all of your code.
@@ -51,16 +57,23 @@ window.registerModule=function(){var n={},r={};return function(t,u,o){function f
 
 ## Setup with gulp
 
+Example with `gulp-webrequire` and `js-minify`
+
 In your `gulpfile.json`:
 
 ```javascript
-const webrequire = require('gulp-webrequire').default
+const gulp = require('gulp')
+const minify = require('gulp-minify')
+const { webRequire } = require('gulp-webrequire')
 
-gulp.task('typescript-test-resources', function () {
+gulp.task('javascript', function () {
   return gulp.src('src/**/*.js')
     .pipe(webRequire())
-    .pipe(gulp.dest('build/'))
+    .pipe(minify())
+    .pipe(gulp.dest('public/'))
 })
+
+gulp.task('default', ['javascript'])
 ```
 
 ## How to find out what scripts-tags need to be added.
