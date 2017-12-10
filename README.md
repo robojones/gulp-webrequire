@@ -1,15 +1,15 @@
 # gulp-webrequire
 
-Use require in the browser with this gulp module.
+Use require in the browser with this gulp plugin.
 
 [![CircleCI](https://circleci.com/gh/robojones/gulp-webrequire.svg?style=shield)](https://circleci.com/gh/robojones/gulp-webrequire)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## How it works
 
-The difference between this module and other solution like webpack is, that this module does not create a single .js file containing all of your code.
+The difference between this plugin and other solution like webpack is, that it does not create a single .js file containing all of your code.
 Instead it leaves your code as single files and imports modules like [jQuery](https://npmjs.com/package/jquery) into a `modules/` folder.
-When using this module one still needs to add a `<script>`-tag for every single file to your HTML.
+When using this plugin one still needs to add a `<script>`-tag for every single file to your HTML.
 
 __So why should I use this?__
 
@@ -23,7 +23,7 @@ With `gulp-webrequire` you can add the `async` attribute to the `<script>`-tags.
 This will allow your script files to be loaded parallely.
 You don't need to worry about the order in which your scripts are executed - If one of your scripts requires another one,
 `gulp-webrequire` will make sure that the required file is executed first.
-To reduce the overhead of code that needs to be added to all of your files, this modules works with a __small inline code-snippet__.
+To reduce the overhead of code that needs to be added to all of your files, there a __small inline code-snippet__.
 
 ## Inline snippet
 
@@ -63,6 +63,21 @@ gulp.task('typescript-test-resources', function () {
 })
 ```
 
-## How to find out what scripts-tags need to be added (coming soon).
+## How to find out what scripts-tags need to be added.
 
-There will be a command-line tool, to help with this.
+Gulp-webrequire comes with a small CLI that helps you with that.
+To use the CLI, you will need to install this module globally:
+
+```
+sudo npm install -g gulp-webrequire
+```
+
+You can then use the `webrequire` command.
+
+```
+webrequire script.js somefolder/menu.js
+```
+
+This will output all script-tags that you need to add to your website into the terminal.
+
+__Tip:__ If you are using e.g. a custom domain for your static resources, you can add that with the `--prefix` option.
