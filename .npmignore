@@ -1,6 +1,25 @@
 node_modules/
-assets/
+
+# npm lockfile
+package-lock.json
+
+# tests
 coverage/
-config.json
+build/test
+build/test-resources
+
+# typescript
+src/
+tsconfig.json
+tslint.json
+
+# gulp
+gulpfile.js
+
+# ci
+cirecle.yml
+
+# misc
 .directory
+.gitignore
 *.log
