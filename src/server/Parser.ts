@@ -39,6 +39,10 @@ class Parser extends EventEmitter {
     return files
   }
 
+  /**
+   * Returns a vinyl object representing the exported file of the module
+   * @param fileHandle - An object representing the location of the module.
+   */
   private async import (fileHandle: File): Promise<Vinyl> {
     const finalPath = fileHandle.finalPath
 
@@ -80,6 +84,11 @@ class Parser extends EventEmitter {
     return file
   }
 
+  /**
+   * Wraps the contents of the file into a registerModule() function.
+   * @param requirements - An array of arrays representing the requirements for the file.
+   * @param file - A vinyl object representing the file.
+   */
   private wrap (requirements: File[], file: Vinyl) {
     const name = file.path.substr(file.base.length)
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
