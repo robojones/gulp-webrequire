@@ -29,7 +29,7 @@ To reduce the overhead of code that needs to be added to all of your files, this
 
 ```html
 <script>
-window.registerModule=(()=>{const n={},t={};return function(o,c,r){function e(n){u=u.filter(t=>t!==n)}function f(){u.length||function(){const o={exports:{}};r(o,o.exports,i),function(o){n[c]=o.exports,t[c]&&t[c].forEach(n=>n())}(o)}()}function i(t){const c=o.find(n=>n[0]===t)[1];return n[c]}let u=o.map(n=>n[1]);o.forEach(([o,c])=>{n[c]?e(c):function(n,o){t[n]||(t[n]=[]),t[n].push(o)}(c,()=>{e(c),f()})}),f()}})();
+window.registerModule=function(){var n={},r={};return function(t,u,o){function f(n){c=c.filter(function(r){return r!==n})}function i(){if(!c.length){var t={exports:{}};o(t,t.exports,e),n[u]=t.exports,r[u]&&r[u].forEach(function(n){return n()})}}function e(r){var u=t.filter(function(n){return n[0]===r})[1][1];return n[u]}var c=t.map(function(n){return n[1]});t.forEach(function(t){t[0];var u=t[1];n[u]?f(u):function(n,t){r[n]||(r[n]=[]),r[n].push(t)}(u,function(){f(u),i()})}),i()}}();
 </script>
 ```
 
@@ -41,7 +41,7 @@ The head of your Website could look like this:
 <head>
   <title>Very nice website</title>
   <script>
-  window.registerModule=(()=>{const n={},t={};return function(o,c,r){function e(n){u=u.filter(t=>t!==n)}function f(){u.length||function(){const o={exports:{}};r(o,o.exports,i),function(o){n[c]=o.exports,t[c]&&t[c].forEach(n=>n())}(o)}()}function i(t){const c=o.find(n=>n[0]===t)[1];return n[c]}let u=o.map(n=>n[1]);o.forEach(([o,c])=>{n[c]?e(c):function(n,o){t[n]||(t[n]=[]),t[n].push(o)}(c,()=>{e(c),f()})}),f()}})();
+window.registerModule=function(){var n={},r={};return function(t,u,o){function f(n){c=c.filter(function(r){return r!==n})}function i(){if(!c.length){var t={exports:{}};o(t,t.exports,e),n[u]=t.exports,r[u]&&r[u].forEach(function(n){return n()})}}function e(r){var u=t.filter(function(n){return n[0]===r})[1][1];return n[u]}var c=t.map(function(n){return n[1]});t.forEach(function(t){t[0];var u=t[1];n[u]?f(u):function(n,t){r[n]||(r[n]=[]),r[n].push(t)}(u,function(){f(u),i()})}),i()}}();
   </script>
   <script async src="/script.js"></script>
   <script async src="/module/jquery.js"></script>

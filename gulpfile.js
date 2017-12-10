@@ -46,8 +46,8 @@ gulp.task('typescript-cli', function () {
 })
 
 const browserTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
-  target: 'es6',
-  lib: ['esnext', 'dom']
+  target: 'es5',
+  lib: ['es5', 'dom']
 }))
 
 gulp.task('typescript-browser', function () {

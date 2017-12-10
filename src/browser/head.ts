@@ -21,12 +21,12 @@
       } else {
         addCallback(realPath, () => {
           removeFromQueue(realPath)
-          trigger()
+          execute()
         })
       }
     })
 
-    trigger()
+    execute()
 
     /** Removes a requirement from the queue. */
     function removeFromQueue (modulename: string) {
@@ -34,28 +34,29 @@
     }
 
     /** Tries to execute the module. Aborts if not all requirements are met. */
-    function trigger () {
-      if (!queue.length) {
-        execute()
-      }
-    }
-
-    /** Executes the module. */
     function execute () {
+      if (queue.length) {
+        return
+      }
       const module = {
         exports: {}
       }
 
       contents(module, module.exports, localRequire)
 
-      resolve(module)
+      cache[name] = module.exports
+
+      // trigger the callbacks
+      if (callbacks[name]) {
+        callbacks[name].forEach(cb => cb())
+      }
     }
 
     /** A local require function to pass to the module. */
     function localRequire (modulename: string) {
-      const realname = requirements.find(requirement => {
+      const realname = requirements.filter(requirement => {
         return requirement[0] === modulename
-      })[1]
+      })[0][1]
 
       return cache[realname]
     }
@@ -67,15 +68,6 @@
       }
 
       callbacks[modulename].push(callback)
-    }
-
-    /** Resolves the current module. Adds the exported data to the cache. */
-    function resolve (module: { exports: any }) {
-      cache[name] = module.exports
-
-      if (callbacks[name]) {
-        callbacks[name].forEach(cb => cb())
-      }
     }
   }
 
