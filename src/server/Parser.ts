@@ -89,7 +89,7 @@ class Parser extends EventEmitter {
       `window.registerModule(${requirementString}, ${JSON.stringify(name)}, function (module, exports, require) {\n`
     )
 
-    const postfix = Buffer.from('})\n')
+    const postfix = Buffer.from('\n})\n')
 
     const parts = [prefix, file.contents as Buffer, postfix]
     file.contents = Buffer.concat(parts)
