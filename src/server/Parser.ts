@@ -18,7 +18,7 @@ class Parser extends EventEmitter {
    * All importet files will also be emitted in the "file" event.
    * @param origin - The file to parse.
    */
-  public async parse (origin: Vinyl)/*: Promise<Vinyl[]>*/ {
+  public async parse (origin: Vinyl): Promise<Vinyl[]> {
 
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
