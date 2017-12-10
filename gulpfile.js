@@ -1,7 +1,6 @@
 const gulp = require('gulp')
 const ts = require('gulp-typescript')
 const { Transform } = require('stream')
-const gutil = require('gulp-util')
 const merge = require('merge2')
 const minify = require('gulp-minify')
 const pump = require('pump')
@@ -91,7 +90,7 @@ gulp.task('typescript-test-resources', function () {
 
   return merge([
     tsResult.dts.pipe(gulp.dest('build/test-resources')),
-    tsResult.js.pipe(webRequire().on('error', console.log)).pipe(gulp.dest('build/test-resources'))
+    tsResult.js.pipe(webRequire()).pipe(gulp.dest('build/test-resources')).on('error', err => console.log(err.toString()))
   ])
 })
 

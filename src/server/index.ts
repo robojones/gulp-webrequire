@@ -1,3 +1,4 @@
+import { PluginError } from 'gulp-util'
 import { Transform } from 'stream'
 import * as Vinyl from 'vinyl'
 import Parser from './Parser'
@@ -11,7 +12,7 @@ export function webRequire (options) {
 
   function transform (chunk, enc, cb) {
     const origin = chunk as Vinyl
-    const callback = cb as (error: Error, file?: Vinyl) => void
+    const callback = cb as (error?: Error, file?: Vinyl) => void
 
     parser.on('file', file => {
       this.push(file)
@@ -20,7 +21,12 @@ export function webRequire (options) {
     parser.parse(origin).then(() => {
       callback(null, origin)
     }).catch(error => {
-      callback(error)
+      const gulpError = new PluginError('gulp-webrequire', error, {
+        showProperties: false
+      })
+
+      this.emit('error', gulpError)
+      callback()
     })
   }
 

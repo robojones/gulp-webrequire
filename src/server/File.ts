@@ -1,7 +1,5 @@
-import { PluginError } from 'gulp-util'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
-const gutil = require('gulp-util')
 
 export default class File {
 
@@ -17,18 +15,19 @@ export default class File {
   /** The absolute path to the directory containing the file that originally mentioned this file. */
   public origin: string
 
+  /** The absolute path to the file that originally mentioned this file. */
+  public originPath: string
+
   constructor (origin: Vinyl, mention: string) {
     if (path.isAbsolute(mention)) {
-      throw new PluginError({
-        message: `Absolute paths are forbidden! (${origin.path})`,
-        plugin: 'gulp-webrequire'
-      })
+      throw new Error(`Absolute paths are forbidden! (${origin.path})`)
     }
 
     this.cwd = origin.cwd
     this.base = origin.base
     this.mention = mention
     this.origin = path.dirname(origin.path)
+    this.originPath = origin.path
   }
 
   /** The absolute path to the file. */
@@ -65,10 +64,7 @@ export default class File {
     const resolved = this.resolved
 
     if (!resolved.startsWith(this.base)) {
-      throw new PluginError({
-        message: `File is not in cwd! (${resolved})`,
-        plugin: 'gulp-webrequire'
-      })
+      throw new Error(`File is not in cwd! (${resolved})`)
     }
 
     return resolved.substr(this.base.length)

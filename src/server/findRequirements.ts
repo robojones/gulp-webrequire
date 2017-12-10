@@ -1,5 +1,4 @@
 import { tokenize } from 'esprima'
-import { PluginError } from 'gulp-util'
 import * as Vinyl from 'vinyl'
 import File from './File'
 
@@ -24,10 +23,7 @@ export default function findRequirements (origin: Vinyl): File[] {
     } else if (type === 'Identifier' && value === 'require') {
       waitForString = true
     } else if (type === 'Keyword' && value === 'import') {
-      throw new PluginError({
-        message: `The import syntax is not supported! (${origin.path})`,
-        plugin: 'gulp-webrequire'
-      })
+      throw new Error(`The import syntax is not supported! (${origin.path})`)
     }
   }
 

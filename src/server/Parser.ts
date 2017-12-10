@@ -1,6 +1,4 @@
 import { EventEmitter } from 'events'
-import { PluginError } from 'gulp-util'
-import * as gutil from 'gulp-util'
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
@@ -25,7 +23,6 @@ class Parser extends EventEmitter {
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
     const requirements = findRequirements(origin)
-
 
     const promises = requirements.map(fileHandle => {
       if (!fileHandle.isModule) {
@@ -53,8 +50,10 @@ class Parser extends EventEmitter {
     const originalPath = fileHandle.resolved
 
     if (originalPath === fileHandle.mention) {
-      gutil.log(`WARNING (gulp-webrequire): The internal module ${originalPath} will not be available in the browser!`)
-      return // is internal module
+      throw new Error(
+        `The internal module "${fileHandle.mention}" was required in "${fileHandle.originPath}". `
+        + 'Internal modules cannot be imported.'
+      )
     }
 
     const stat = await fs.stat(originalPath)
@@ -69,10 +68,9 @@ class Parser extends EventEmitter {
     })
 
     if (findRequirements(file).length) {
-      throw new PluginError({
-        message: `External modules are not allowed require other modules! (${originalPath})`,
-        plugin: 'gulp-webrequire'
-      })
+      throw new Error(
+        `External modules are not allowed to require other modules! (${originalPath})`
+      )
     }
 
     this.wrap([], file)
