@@ -11,7 +11,6 @@ const TS_SETTINGS = {
   lib: ['es2017'],
   moduleResolution: 'node',
   module: 'commonjs',
-  declaration: true,
   importHelpers: true,
   inlineSourceMap: true,
   listFiles: false,
