@@ -8,13 +8,13 @@ Use require in the browser with this gulp plugin.
 ## Installation
 
 ```
-npm install gulp-webrequire
+npm install --save gulp-webrequire
 ```
 
 ## How it works
 
 The difference between this plugin and other solution like webpack is, that it does not create a single .js file containing all of your code.
-Instead it leaves your code as single files and imports modules like [jQuery](https://npmjs.com/package/jquery) into a `modules/` folder.
+Instead it leaves your code as single files and imports modules like [jQuery](https://npmjs.com/package/jquery) into a `module/` folder.
 When using this plugin one still needs to add a `<script>`-tag for every single file to your HTML.
 
 __So why should I use this?__
@@ -57,7 +57,7 @@ window.registerModule=function(){var n={},r={};return function(t,u,o){function f
 
 ## Setup with gulp
 
-Example with `gulp-webrequire` and `js-minify`
+Example with `gulp-webrequire` and `gulp-minify`
 
 In your `gulpfile.json`:
 
