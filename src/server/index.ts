@@ -4,7 +4,7 @@ import * as Vinyl from 'vinyl'
 import Parser from './Parser'
 
 /** Use require in the browser with this gulp plugin. */
-export function webRequire (options): Transform {
+export function webRequire (): Transform {
   const parser = new Parser()
 
   function transform (chunk, enc, cb) {
