@@ -3,7 +3,13 @@ import { Transform } from 'stream'
 import * as Vinyl from 'vinyl'
 import Parser from './Parser'
 
-/** Use require in the browser with this gulp plugin. */
+/**
+ * Use require in the browser with this gulp plugin.
+ * @example
+ *  gulp.src('src/*.ts')
+ *    .pipe(webRequire())
+ *    .pipe(gulp.dest('build'))
+ */
 export function webRequire (): Transform {
   const parser = new Parser()
 
