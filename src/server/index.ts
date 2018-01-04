@@ -1,3 +1,4 @@
+import * as fs from 'fs'
 import { PluginError } from 'gulp-util'
 import { Transform } from 'stream'
 import * as Vinyl from 'vinyl'
@@ -38,5 +39,8 @@ export function webRequire (): Transform {
     transform
   })
 }
+
+const snippetPath = require.resolve('../browser/head.min.js')
+export const snippet = fs.readFileSync(snippetPath).toString()
 
 export default webRequire
