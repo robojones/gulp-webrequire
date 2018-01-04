@@ -41,6 +41,7 @@ export function webRequire (): Transform {
 }
 
 const snippetPath = require.resolve('../browser/head.min.js')
+/** A string containing the inline snippet of the current webRequire version. */
 export const snippet = fs.readFileSync(snippetPath).toString()
 
 export default webRequire
