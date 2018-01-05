@@ -11,7 +11,7 @@ describe('gulp-webrequire', () => {
     this.timeout(30000)
 
     // initialize
-    require('../browser/head.min.js')
+    require('../browser/snippet.min.js')
 
     // import the files
     require('../test-resources/main')

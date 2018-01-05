@@ -84,7 +84,7 @@ function action (files: string[], options: Options) {
   }
 
   if (!options.hideSnippet) {
-    const snippetPath = require.resolve('../browser/head.min.js')
+    const snippetPath = require.resolve('../browser/snippet.min.js')
     const snippet = fs.readFileSync(snippetPath)
     console.log(`<script>\n${snippet}\n</script>`)
   }
