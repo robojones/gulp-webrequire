@@ -3,24 +3,11 @@ import { EventEmitter } from 'events'
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
-import File from './File'
+import File from '../File'
+import VinylWithRequirements from '../VinylWithRequirements'
 import findRequirements from './findRequirements'
 
-export interface VinylWithRequirements extends Vinyl {
-  /**
-   * This array contains the names (as file objects) of the dependencies of this file.
-   */
-  requirements?: File[]
 
-  /**
-   * If the file is not a wrapper it has references to a wrapper.
-   * This object contains the pre and postfix of the wrapper.
-   */
-  wrapper?: {
-    pre: VinylWithRequirements,
-    post: VinylWithRequirements
-  }
-}
 
 declare interface Parser {
   on (event: 'file', listener: (file: VinylWithRequirements) => void): this

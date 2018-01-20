@@ -1,6 +1,6 @@
 import { tokenize } from 'esprima'
 import * as Vinyl from 'vinyl'
-import File from './File'
+import File from '../File'
 
 /**
  * Finds and returns the paths to all files that are required or imported in the code.

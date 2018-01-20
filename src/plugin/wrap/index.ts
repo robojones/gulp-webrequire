@@ -2,8 +2,6 @@ import * as fs from 'fs'
 import { Transform } from 'stream'
 import * as through from 'through2'
 import * as Vinyl from 'vinyl'
-import VinylWithRequirements from '../VinylWithRequirements'
-import Parser from './Parser'
 
 /**
  * Use require in the browser with this gulp plugin.
@@ -15,17 +13,8 @@ import Parser from './Parser'
 export function webRequire (): Transform {
   const parser = new Parser()
 
-  const stream = through.obj(function transform (origin: Vinyl, enc, cb) {
-    const callback = cb as (error?: Error, file?: Vinyl) => void
+  const stream = through.obj(function (origin: Vinyl, enc, cb) {
 
-    console.log('origin', origin.relative)
-
-    parser.parse(origin).then(() => {
-      callback()
-    }).catch(error => {
-      this.emit('error', error)
-      callback()
-    })
   })
 
   parser.on('file', file => {
