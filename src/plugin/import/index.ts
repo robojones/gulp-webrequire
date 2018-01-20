@@ -1,8 +1,9 @@
 import * as fs from 'fs'
 import { PluginError } from 'gulp-util'
 import { Transform } from 'stream'
+import * as through from 'through2'
 import * as Vinyl from 'vinyl'
-import Parser from './Parser'
+import Parser, {VinylWithRequirements} from './Parser'
 
 /**
  * Use require in the browser with this gulp plugin.
@@ -14,30 +15,25 @@ import Parser from './Parser'
 export function webRequire (): Transform {
   const parser = new Parser()
 
-  function transform (chunk, enc, cb) {
-    const origin = chunk as Vinyl
+  const stream = through.obj(function transform (origin: Vinyl, enc, cb) {
     const callback = cb as (error?: Error, file?: Vinyl) => void
 
-    parser.on('file', file => {
-      this.push(file)
-    })
+    console.log('origin', origin.relative)
 
     parser.parse(origin).then(() => {
-      callback(null, origin)
+      callback()
     }).catch(error => {
-      const gulpError = new PluginError('gulp-webrequire', error, {
-        showProperties: false
-      })
-
-      this.emit('error', gulpError)
+      this.emit('error', error)
       callback()
     })
-  }
-
-  return new Transform({
-    objectMode: true,
-    transform
   })
+
+  parser.on('file', file => {
+    console.log('got file:', file.path)
+    stream.push(file)
+  })
+
+  return stream
 }
 
 const snippetPath = require.resolve('../browser/snippet.min.js')

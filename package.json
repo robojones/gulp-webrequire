@@ -56,9 +56,13 @@
     "typescript": "^2.6.1"
   },
   "dependencies": {
+    "@types/through2": "^2.0.33",
     "commander": "^2.12.2",
+    "concat-with-sourcemaps": "^1.0.5",
     "esprima": "^4.0.0",
+    "gulp-sourcemaps": "^2.6.3",
     "mz": "^2.7.0",
+    "through2": "^2.0.3",
     "vinyl": "^2.1.0"
   }
 }

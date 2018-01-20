@@ -4,6 +4,7 @@ const { Transform } = require('stream')
 const merge = require('merge2')
 const minify = require('gulp-minify')
 const pump = require('pump')
+const sourcemaps = require('gulp-sourcemaps')
 
 const TS_SETTINGS = {
   declaration: true,
@@ -89,7 +90,11 @@ gulp.task('typescript-test-resources', function () {
 
   return merge([
     tsResult.dts.pipe(gulp.dest('build/test-resources')),
-    tsResult.js.pipe(webRequire()).pipe(gulp.dest('build/test-resources')).on('error', err => console.log(err.toString()))
+    tsResult.js
+      .pipe(sourcemaps.init())
+      .pipe(webRequire())
+      .pipe(sourcemaps.write())
+      .pipe(gulp.dest('build/test-resources')).on('error', err => console.log(err.toString()))
   ])
 })
 

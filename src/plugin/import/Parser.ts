@@ -1,3 +1,4 @@
+import Concat = require('concat-with-sourcemaps')
 import { EventEmitter } from 'events'
 import * as fs from 'mz/fs'
 import * as path from 'path'
@@ -5,8 +6,25 @@ import * as Vinyl from 'vinyl'
 import File from './File'
 import findRequirements from './findRequirements'
 
+export interface VinylWithRequirements extends Vinyl {
+  /**
+   * This array contains the names (as file objects) of the dependencies of this file.
+   */
+  requirements?: File[]
+
+  /**
+   * If the file is not a wrapper it has references to a wrapper.
+   * This object contains the pre and postfix of the wrapper.
+   */
+  wrapper?: {
+    pre: VinylWithRequirements,
+    post: VinylWithRequirements
+  }
+}
+
 declare interface Parser {
-  on (event: 'file', listener: (file: Vinyl) => void): this
+  on (event: 'file', listener: (file: VinylWithRequirements) => void): this
+  emit (event: 'file', file: VinylWithRequirements): boolean
 }
 
 class Parser extends EventEmitter {
@@ -18,7 +36,7 @@ class Parser extends EventEmitter {
    * All importet files will also be emitted in the "file" event.
    * @param origin - The file to parse.
    */
-  public async parse (origin: Vinyl): Promise<Vinyl[]> {
+  public async parse (origin: VinylWithRequirements): Promise<void> {
 
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
@@ -26,25 +44,28 @@ class Parser extends EventEmitter {
 
     const promises = requirements.map(fileHandle => {
       if (!fileHandle.isModule) {
-        return null
+        return
       }
 
       return this.import(fileHandle)
-    }).filter(e => e) as Array<Promise<Vinyl>>
+    }).filter(e => e) as Array<Promise<void>>
 
     const files = await Promise.all(promises)
 
-    this.wrap(requirements, origin)
+    origin.wrapper = this.createWrappers(requirements, origin)
+    origin.requirements = requirements
 
-    return files
+    this.emit('file', origin)
   }
 
   /**
    * Returns a vinyl object representing the exported file of the module
    * @param fileHandle - An object representing the location of the module.
    */
-  private async import (fileHandle: File): Promise<Vinyl> {
+  private async import (fileHandle: File): Promise<void> {
     const finalPath = fileHandle.finalPath
+
+    console.log(fileHandle.resolved, 'history', this.history)
 
     if (this.history.includes(finalPath)) {
       return
@@ -69,7 +90,7 @@ class Parser extends EventEmitter {
       cwd: fileHandle.cwd,
       path: finalPath,
       stat,
-    })
+    }) as VinylWithRequirements
 
     if (findRequirements(file).length) {
       throw new Error(
@@ -77,11 +98,10 @@ class Parser extends EventEmitter {
       )
     }
 
-    this.wrap([], file)
+    file.wrapper = this.createWrappers([], file)
+    file.requirements = []
 
     this.emit('file', file)
-
-    return file
   }
 
   /**
@@ -89,7 +109,8 @@ class Parser extends EventEmitter {
    * @param requirements - An array of arrays representing the requirements for the file.
    * @param file - A vinyl object representing the file.
    */
-  private wrap (requirements: File[], file: Vinyl) {
+  private createWrappers (requirements: File[], file: VinylWithRequirements) {
+    console.log('create wrapepr for', file.relative)
     const name = file.path.substr(file.base.length)
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
     const prefix = Buffer.from(
@@ -98,8 +119,30 @@ class Parser extends EventEmitter {
 
     const postfix = Buffer.from('\n})\n')
 
-    const parts = [prefix, file.contents as Buffer, postfix]
-    file.contents = Buffer.concat(parts)
+    const pre = new Vinyl({
+      base: path.join(file.base, 'gulp-webrequire-postfix'),
+      contents: prefix,
+      cwd: file.cwd,
+      path: path.join(file.base, 'gulp-webrequire-postfix', file.relative),
+    })
+
+    console.log('emit pre')
+    this.emit('file', pre)
+
+    const post = new Vinyl({
+      base: path.join(file.base, 'gulp-webrequire-prefix'),
+      contents: postfix,
+      cwd: file.cwd,
+      path: path.join(file.base, 'gulp-webrequire-prefix', file.relative),
+    })
+
+    console.log('emit post')
+    this.emit('file', post)
+
+    return {
+      post,
+      pre
+    }
   }
 }
 
