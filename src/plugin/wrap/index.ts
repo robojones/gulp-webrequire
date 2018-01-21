@@ -1,32 +1,29 @@
-import * as fs from 'fs'
+import Concat = require('concat-with-sourcemaps')
 import { Transform } from 'stream'
 import * as through from 'through2'
 import * as Vinyl from 'vinyl'
+import VinylWithRequirements from '../VinylWithRequirements'
 
-/**
- * Use require in the browser with this gulp plugin.
- * @example
- *  gulp.src('src/*.ts')
- *    .pipe(webRequire())
- *    .pipe(gulp.dest('build'))
- */
-export function webRequire (): Transform {
-  const parser = new Parser()
+export default function wrap (): Transform {
+  const stream = through.obj((file: VinylWithRequirements, enc, cb) => {
+    if (file.wrapper) {
+      const concat = new Concat(!!file.sourceMap, file.relative)
+      const { pre, post } = file.wrapper
+      concat.add(pre.relative, pre.contents, pre.sourceMap)
+      concat.add(file.relative, file.contents, file.sourceMap)
+      concat.add(post.relative, post.contents, post.sourceMap)
 
-  const stream = through.obj(function (origin: Vinyl, enc, cb) {
+      console.log('merging: ', pre.relative, file.relative, post.relative)
 
-  })
-
-  parser.on('file', file => {
-    console.log('got file:', file.path)
-    stream.push(file)
+      file.contents = concat.content
+      file.sourceMap = JSON.parse(concat.sourceMap)
+      cb(null, file)
+    } else {
+      console.log('file has no wrappers', file.relative)
+      // ignore this file because it's a prefix or postfix
+      cb()
+    }
   })
 
   return stream
 }
-
-const snippetPath = require.resolve('../browser/snippet.min.js')
-/** A string containing the inline snippet of the current webRequire version. */
-export const snippet = fs.readFileSync(snippetPath).toString()
-
-export default webRequire

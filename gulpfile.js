@@ -19,16 +19,16 @@ const TS_SETTINGS = {
   pretty: true
 }
 
-const serverTS = ts.createProject(TS_SETTINGS)
+const pluginTS = ts.createProject(TS_SETTINGS)
 
-gulp.task('typescript-server', function () {
+gulp.task('typescript-plugin', function () {
 
-  const tsResult = gulp.src(['src/server/**/*.ts'])
-    .pipe(serverTS())
+  const tsResult = gulp.src(['src/plugin/**/*.ts'])
+    .pipe(pluginTS())
 
   return merge([
-    tsResult.dts.pipe(gulp.dest('build/server')),
-    tsResult.js.pipe(gulp.dest('build/server'))
+    tsResult.dts.pipe(gulp.dest('build/plugin')),
+    tsResult.js.pipe(gulp.dest('build/plugin'))
   ])
 })
 
@@ -99,13 +99,13 @@ gulp.task('typescript-test-resources', function () {
 })
 
 gulp.task('typescript-watch', function () {
-  gulp.watch('src/server/**/*.ts', ['typescript-server'])
+  gulp.watch('src/plugin/**/*.ts', ['typescript-plugin'])
   gulp.watch('src/browser/**/*.ts', ['typescript-browser'])
   gulp.watch('src/cli/**/*.ts', ['typescript-cli'])
   gulp.watch('src/test/**/*.ts', ['typescript-test'])
   gulp.watch('src/test-resources/**/*.ts', ['typescript-test-resources'])
 })
 
-gulp.task('typescript', ['typescript-server', 'typescript-browser', 'typescript-cli'])
+gulp.task('typescript', ['typescript-plugin', 'typescript-browser', 'typescript-cli'])
 gulp.task('test', ['typescript-test', 'typescript-test-resources'])
 gulp.task('default', ['typescript', 'test', 'typescript-watch'])

@@ -1,7 +1,7 @@
 {
   "name": "gulp-webrequire",
-  "main": "build/server/index",
-  "typings": "build/server/index",
+  "main": "build/plugin/index",
+  "typings": "build/plugin/index",
   "description": "Use require in the browser with this gulp plugin.",
   "version": "0.0.3",
   "bin": {

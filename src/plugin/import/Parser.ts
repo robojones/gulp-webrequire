@@ -107,7 +107,7 @@ class Parser extends EventEmitter {
     const postfix = Buffer.from('\n})\n')
 
     const pre = new Vinyl({
-      base: path.join(file.base, 'gulp-webrequire-postfix'),
+      base: file.base,
       contents: prefix,
       cwd: file.cwd,
       path: path.join(file.base, 'gulp-webrequire-postfix', file.relative),
@@ -117,7 +117,7 @@ class Parser extends EventEmitter {
     this.emit('file', pre)
 
     const post = new Vinyl({
-      base: path.join(file.base, 'gulp-webrequire-prefix'),
+      base: file.base,
       contents: postfix,
       cwd: file.cwd,
       path: path.join(file.base, 'gulp-webrequire-prefix', file.relative),
