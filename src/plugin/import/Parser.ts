@@ -98,7 +98,7 @@ class Parser extends EventEmitter {
    */
   private createWrappers (requirements: File[], file: VinylWithRequirements) {
     console.log('create wrapepr for', file.relative)
-    const name = file.path.substr(file.base.length)
+    const name = file.relative
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
     const prefix = Buffer.from(
       `window.registerModule(${requirementString}, ${JSON.stringify(name)}, function (module, exports, require) {\n`

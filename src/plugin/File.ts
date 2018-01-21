@@ -58,7 +58,7 @@ export default class File {
   /** The final path relative to the output directory. */
   get finalName () {
     if (this.isModule) {
-      return path.join('/module', this.mention + '.js')
+      return path.join('module', this.mention + '.js')
     }
 
     const resolved = this.resolved
@@ -67,7 +67,8 @@ export default class File {
       throw new Error(`File is not in cwd! (${resolved})`)
     }
 
-    return resolved.substr(this.base.length)
+    // Remove base and "/" in the beginning.
+    return resolved.substr(this.base.length + 1)
   }
 
   /** An array containing the mention [0] and the path [1] to the file relative to the cwd */
