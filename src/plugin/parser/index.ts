@@ -50,8 +50,6 @@ class Parser extends EventEmitter {
   private async import (fileHandle: File): Promise<void> {
     const finalPath = fileHandle.finalPath
 
-    console.log(fileHandle.resolved, 'history', this.history)
-
     if (this.history.includes(finalPath)) {
       return
     }
@@ -113,7 +111,6 @@ class Parser extends EventEmitter {
    * @param file - A vinyl object representing the file.
    */
   private createWrappers (requirements: File[], file: Vinyl): {post: Vinyl, pre: Vinyl} {
-    console.log('create wrapepr for', file.relative)
     const name = file.relative
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
     const prefix = Buffer.from(
@@ -155,7 +152,6 @@ class Parser extends EventEmitter {
   private initSourcemap (file: Vinyl, origin?: Vinyl) {
     let name: string
     if (origin) {
-      console.log(origin.path, 'to', file.path)
       name = path.relative(origin.dirname, file.path)
     } else {
       name = file.relative

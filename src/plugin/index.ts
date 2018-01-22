@@ -5,11 +5,6 @@ import * as through from 'through2'
 import * as Vinyl from 'vinyl'
 import Parser from './parser'
 
-process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at:', p, 'reason:', reason)
-  // application specific logging, throwing an error, or other logic here
-})
-
 /**
  * Use require in the browser with this gulp plugin.
  * @example
@@ -23,8 +18,6 @@ export default function webRequire (): Transform {
   const stream = through.obj(function transform (origin: Vinyl, enc, cb) {
     const callback = cb as (error?: Error, file?: Vinyl) => void
 
-    console.log('origin', origin.relative)
-
     parser.parse(origin).then(() => {
       callback()
     }).catch(error => {
@@ -34,7 +27,6 @@ export default function webRequire (): Transform {
   })
 
   parser.on('file', file => {
-    console.log('got file:', file.path)
     stream.push(file)
   })
 
