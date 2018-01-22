@@ -84,14 +84,14 @@ const resourcesTS = ts.createProject(TS_SETTINGS)
 gulp.task('typescript-test-resources', function () {
 
   const tsResult = gulp.src('src/test-resources/**/*.ts')
-    .pipe(resourcesTS())
+  .pipe(sourcemaps.init())  
+  .pipe(resourcesTS())
 
   const webRequire = require('.').default
 
   return merge([
     tsResult.dts.pipe(gulp.dest('build/test-resources')),
     tsResult.js
-      .pipe(sourcemaps.init())
       .pipe(webRequire())
       .pipe(sourcemaps.write())
       .pipe(gulp.dest('build/test-resources')).on('error', err => console.log(err.toString()))
