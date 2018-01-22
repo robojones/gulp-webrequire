@@ -4,14 +4,13 @@ import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
 import File from '../File'
-import VinylWithRequirements from '../VinylWithRequirements'
 import findRequirements from './findRequirements'
 
 
 
 declare interface Parser {
-  on (event: 'file', listener: (file: VinylWithRequirements) => void): this
-  emit (event: 'file', file: VinylWithRequirements): boolean
+  on (event: 'file', listener: (file: Vinyl, requirements: File[]) => void): this
+  emit (event: 'file', file: Vinyl, requirements: File[]): boolean
 }
 
 class Parser extends EventEmitter {
@@ -23,7 +22,7 @@ class Parser extends EventEmitter {
    * All importet files will also be emitted in the "file" event.
    * @param origin - The file to parse.
    */
-  public async parse (origin: VinylWithRequirements): Promise<void> {
+  public async parse (origin: Vinyl): Promise<void> {
 
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
@@ -39,10 +38,9 @@ class Parser extends EventEmitter {
 
     const files = await Promise.all(promises)
 
-    origin.wrapper = this.createWrappers(requirements, origin)
-    origin.requirements = requirements
+    origin.wrapper = this.wrap(requirements, origin)
 
-    this.emit('file', origin)
+    this.emit('file', origin, requirements)
   }
 
   /**
@@ -77,7 +75,9 @@ class Parser extends EventEmitter {
       cwd: fileHandle.cwd,
       path: finalPath,
       stat,
-    }) as VinylWithRequirements
+    }) as Vinyl
+
+    this.initSourcemap(file)
 
     if (findRequirements(file).length) {
       throw new Error(
@@ -85,10 +85,9 @@ class Parser extends EventEmitter {
       )
     }
 
-    file.wrapper = this.createWrappers([], file)
-    file.requirements = []
+    file.wrapper = this.wrap([], file)
 
-    this.emit('file', file)
+    this.emit('file', file, [])
   }
 
   /**
@@ -96,7 +95,24 @@ class Parser extends EventEmitter {
    * @param requirements - An array of arrays representing the requirements for the file.
    * @param file - A vinyl object representing the file.
    */
-  private createWrappers (requirements: File[], file: VinylWithRequirements) {
+  private wrap (requirements: File[], file: Vinyl) {
+    const { pre, post } = this.createWrappers(requirements, file)
+
+    const concat = new Concat(!!file.sourceMap, path.basename(file.path))
+    concat.add(pre.relative, pre.contents, pre.sourceMap)
+    concat.add(file.relative, file.contents, file.sourceMap)
+    concat.add(pre.relative, post.contents, post.sourceMap)
+
+    file.contents = concat.content
+    file.sourceMap = JSON.parse(concat.sourceMap)
+  }
+
+  /**
+   * Creates the prefix and suffix (with sourcemaps) for the file.
+   * @param requirements - An array of arrays representing the requirements for the file.
+   * @param file - A vinyl object representing the file.
+   */
+  private createWrappers (requirements: File[], file: Vinyl): {post: Vinyl, pre: Vinyl} {
     console.log('create wrapepr for', file.relative)
     const name = file.relative
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
@@ -110,25 +126,47 @@ class Parser extends EventEmitter {
       base: file.base,
       contents: prefix,
       cwd: file.cwd,
-      path: path.join(file.base, 'gulp-webrequire-postfix', file.relative),
+      path: path.join(file.base, 'webrequire', file.relative + '.part1'),
     })
 
-    console.log('emit pre')
-    this.emit('file', pre)
+    this.initSourcemap(pre, file)
 
     const post = new Vinyl({
       base: file.base,
       contents: postfix,
       cwd: file.cwd,
-      path: path.join(file.base, 'gulp-webrequire-prefix', file.relative),
+      path: path.join(file.base, 'webrequire', file.relative + '.part2'),
     })
 
-    console.log('emit post')
-    this.emit('file', post)
+    this.initSourcemap(post, file)
 
     return {
       post,
       pre
+    }
+  }
+
+  /**
+   * Initializes a sourcemap for the file.
+   * @param file - The file to apply the sourcemaps.
+   * @param origin - An optional origin file. The file path in the sourcemap will be relative to this file.
+   * If not provided, the sourcemap will be relative to the base directory.
+   */
+  private initSourcemap (file: Vinyl, origin?: Vinyl) {
+    let name: string
+    if (origin) {
+      console.log(origin.path, 'to', file.path)
+      name = path.relative(origin.dirname, file.path)
+    } else {
+      name = file.relative
+    }
+    file.sourceMap = {
+      file: name,
+      mappings: '',
+      names: [],
+      sources: [ name ],
+      sourcesContent: [ file.contents.toString() ],
+      version: 3,
     }
   }
 }

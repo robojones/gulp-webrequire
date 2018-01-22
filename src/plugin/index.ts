@@ -2,10 +2,8 @@ import * as fs from 'fs'
 import * as sourcemaps from 'gulp-sourcemaps'
 import { Transform } from 'stream'
 import * as through from 'through2'
-import importDependencies from './import'
-import detectSourcemaps from './sourcemaps'
-import VinylWithRequirements from './VinylWithRequirements'
-import wrapFile from './wrap'
+import * as Vinyl from 'vinyl'
+import Parser from './parser'
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at:', p, 'reason:', reason)
@@ -20,36 +18,29 @@ process.on('unhandledRejection', (reason, p) => {
  *    .pipe(gulp.dest('build'))
  */
 export default function webRequire (): Transform {
-  const importeur = importDependencies()
-  const wrapper = wrapFile()
+  const parser = new Parser()
 
-  const initSourcemaps = detectSourcemaps(() => {
-    console.log('SOURCEMAPS DETECTED!')
-    // init sourcemaps for imported files if sourcemaps are enabled
-    importeur.unpipe(wrapper)
-    importeur.pipe(sourcemaps.init()).pipe(wrapper)
+  const stream = through.obj(function transform (origin: Vinyl, enc, cb) {
+    const callback = cb as (error?: Error, file?: Vinyl) => void
+
+    console.log('origin', origin.relative)
+
+    parser.parse(origin).then(() => {
+      callback()
+    }).catch(error => {
+      this.emit('error', error)
+      callback()
+    })
   })
 
-  initSourcemaps.pipe(importeur)
-  importeur.pipe(wrapper)
-
-
-  const inOut = through.obj((file, enc, cb) => {
-    initSourcemaps.write(file, cb)
-  }, function flush (cb) {
-    initSourcemaps.end()
-    wrapper.on('end', cb)
-    console.log('END')
+  parser.on('file', file => {
+    console.log('got file:', file.path)
+    stream.push(file)
   })
 
-  wrapper.on('data', (file) => inOut.push(file))
-  inOut.on('data', (file: VinylWithRequirements) => {
-    console.log('RESULT', typeof file.sourceMap)
-  })
-
-  return inOut
+  return stream
 }
 
-const snippetPath = require.resolve('../browser/snippet.min.js')
+// const snippetPath = require.resolve('../browser/snippet.min.js')
 /** A string containing the inline snippet of the current webRequire version. */
-export const snippet = fs.readFileSync(snippetPath).toString()
+// export const snippet = fs.readFileSync(snippetPath).toString()
