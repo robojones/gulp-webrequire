@@ -3,7 +3,7 @@
   "main": "build/plugin/index",
   "typings": "build/plugin/index",
   "description": "Use require in the browser with this gulp plugin.",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "bin": {
     "webrequire": "build/cli/index.js"
   },
