@@ -102,7 +102,9 @@ class Parser extends EventEmitter {
     concat.add(pre.relative, post.contents, post.sourceMap)
 
     file.contents = concat.content
-    file.sourceMap = JSON.parse(concat.sourceMap)
+    if (concat.sourceMap) {
+      file.sourceMap = JSON.parse(concat.sourceMap)
+    }
   }
 
   /**

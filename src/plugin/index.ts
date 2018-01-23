@@ -3,7 +3,7 @@ import * as sourcemaps from 'gulp-sourcemaps'
 import { Transform } from 'stream'
 import * as through from 'through2'
 import * as Vinyl from 'vinyl'
-import Parser from './parser'
+import Parser from './Parser'
 
 /**
  * Use require in the browser with this gulp plugin.
