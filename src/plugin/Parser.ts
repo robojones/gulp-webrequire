@@ -6,7 +6,10 @@ import * as Vinyl from 'vinyl'
 import File from './File'
 import findRequirements from './findRequirements'
 
-
+export interface ParserOptions {
+  modulesDir?: string
+  [option: string]: any
+}
 
 declare interface Parser {
   on (event: 'file', listener: (file: Vinyl, requirements: File[]) => void): this
@@ -15,6 +18,12 @@ declare interface Parser {
 
 class Parser extends EventEmitter {
   private history: string[] = []
+  private options: ParserOptions
+
+  public constructor (options: ParserOptions) {
+    super()
+    this.options = options
+  }
 
   /**
    * Parses the file and imports external dependencies.
@@ -26,7 +35,7 @@ class Parser extends EventEmitter {
 
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
-    const requirements = findRequirements(origin)
+    const requirements = findRequirements(origin, this.options.modulesDir)
 
     const promises = requirements.map(fileHandle => {
       if (!fileHandle.isModule) {

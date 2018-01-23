@@ -3,10 +3,11 @@ import * as Vinyl from 'vinyl'
 import File from './File'
 
 /**
- * Finds and returns the paths to all files that are required or imported in the code.
- * @param code - The code of the program.
+ * Finds and returns the paths to all files that are required or imported in the file.
+ * @param origin - The file that contains the code of the program.
+ * @param modulesDir - The directory that contains imported modules.
  */
-export default function findRequirements (origin: Vinyl): File[] {
+export default function findRequirements (origin: Vinyl, modulesDir: string = 'modules'): File[] {
   const tokens = tokenize(origin.contents.toString())
   const result: File[] = []
   let waitForString = false
@@ -18,7 +19,7 @@ export default function findRequirements (origin: Vinyl): File[] {
       // remove quotes
       const filename = value.substring(1, value.length - 1)
 
-      result.push(new File(origin, filename))
+      result.push(new File(origin, filename, modulesDir))
 
     } else if (type === 'Identifier' && value === 'require') {
       waitForString = true

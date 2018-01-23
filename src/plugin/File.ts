@@ -18,11 +18,15 @@ export default class File {
   /** The absolute path to the file that originally mentioned this file. */
   public originPath: string
 
-  constructor (origin: Vinyl, mention: string) {
+  /** The directory that contains imported modules. */
+  private modulesDir: string
+
+  constructor (origin: Vinyl, mention: string, modulesDir?: string) {
     if (path.isAbsolute(mention)) {
       throw new Error(`Absolute paths are forbidden! (${origin.path})`)
     }
 
+    this.modulesDir = modulesDir
     this.cwd = origin.cwd
     this.base = origin.base
     this.mention = mention
@@ -58,7 +62,7 @@ export default class File {
   /** The final path relative to the output directory. */
   get finalName () {
     if (this.isModule) {
-      return path.join('module', this.mention + '.js')
+      return path.join(this.modulesDir, this.mention + '.js')
     }
 
     const resolved = this.resolved
