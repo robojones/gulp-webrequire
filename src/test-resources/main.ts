@@ -1,5 +1,5 @@
-import * as $ from 'jquery'
 import A from './another-file'
+import * as $ from './test-dir/file'
 
 export function test (condition: any, msg: string): void {
   if (!condition) {

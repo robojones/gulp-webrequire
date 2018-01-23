@@ -7,13 +7,18 @@ import File from './File'
 import findRequirements from './findRequirements'
 
 export interface ParserOptions {
+  /**
+   * The directory that external modules get imported to. (default: 'modules')
+   * @example
+   * { modulesDir: 'lib' }
+   */
   modulesDir?: string
   [option: string]: any
 }
 
 declare interface Parser {
-  on (event: 'file', listener: (file: Vinyl, requirements: File[]) => void): this
-  emit (event: 'file', file: Vinyl, requirements: File[]): boolean
+  on (event: 'file', listener: (file: Vinyl, requirements: string[]) => void): this
+  emit (event: 'file', file: Vinyl, requirements: string[]): boolean
 }
 
 class Parser extends EventEmitter {
@@ -49,7 +54,9 @@ class Parser extends EventEmitter {
 
     origin.wrapper = this.wrap(requirements, origin)
 
-    this.emit('file', origin, requirements)
+    const requirementStrings = requirements.map(file => file.finalName)
+
+    this.emit('file', origin, requirementStrings)
   }
 
   /**

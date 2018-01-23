@@ -64,11 +64,11 @@ In your `gulpfile.json`:
 ```javascript
 const gulp = require('gulp')
 const minify = require('gulp-minify')
-const { webRequire } = require('gulp-webrequire')
+const { webrequire } = require('gulp-webrequire')
 
 gulp.task('javascript', function () {
   return gulp.src('src/**/*.js')
-    .pipe(webRequire())
+    .pipe(webrequire())
     .pipe(minify())
     .pipe(gulp.dest('public/'))
 })
