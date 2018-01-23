@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
-import File from '../File'
+import File from './File'
 import findRequirements from './findRequirements'
 
 
