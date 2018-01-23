@@ -1,5 +1,4 @@
 import * as Concat from 'concat-with-sourcemaps'
-import * as EventEmitter from 'events'
 import * as path from 'path'
 import { Transform } from 'stream'
 import * as through from 'through2'
@@ -19,12 +18,7 @@ export interface ProjectOptions extends ParserOptions {
   smartPacking?: boolean
 }
 
-// declare interface Parser {
-//   on (event: 'file', listener: (file: Vinyl, requirements: File[]) => void): this
-//   emit (event: 'file', file: Vinyl, requirements: File[]): boolean
-// }
-
-export default class Project extends EventEmitter {
+export default class Project {
   private options: ProjectOptions
   private parser: Parser
 
@@ -34,8 +28,6 @@ export default class Project extends EventEmitter {
   private requiredIn = new Storage<List<string>>(List)
 
   constructor (options: ProjectOptions) {
-    super()
-
     this.options = options
     this.parser = new Parser(options)
 
@@ -80,8 +72,6 @@ export default class Project extends EventEmitter {
 
     const packs = new Storage<List<string>>(List)
 
-    // TODO: build all packages and use stream.push() to export all files.
-
     for (const name of this.names) {
       const trace = new List<string>(name)
 
@@ -99,7 +89,6 @@ export default class Project extends EventEmitter {
           // File is required in only one other file -> file gets merged into next file.
           trace.unshift(next)
         } else {
-          // If file
           // If file is not required anywhere or in mulitple files -> file becomes a pack.
           break
         }
@@ -112,12 +101,12 @@ export default class Project extends EventEmitter {
 
     const packNames = packs.keys
 
+    // Merge the files of the packs.
     for (const packName of packNames) {
       const pack = packs.get(packName)
       const mainFile = this.files[packName].clone({contents: true, deep: true})
 
       const concat = new Concat(!!mainFile.sourceMap, path.basename(mainFile.path))
-
 
       for (const name of pack) {
         const file = this.files[name]

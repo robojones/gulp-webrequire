@@ -87,12 +87,12 @@ gulp.task('typescript-test-resources', function () {
   .pipe(sourcemaps.init())  
   .pipe(resourcesTS())
 
-  const webRequire = require('.').default
+  const webrequire = require('.').default
 
   return merge([
     tsResult.dts.pipe(gulp.dest('build/test-resources')),
     tsResult.js
-      .pipe(webRequire())
+      .pipe(webrequire().through())
       .pipe(sourcemaps.write())
       .pipe(gulp.dest('build/test-resources')).on('error', err => console.log(err.toString()))
   ])

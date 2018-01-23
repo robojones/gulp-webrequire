@@ -15,8 +15,8 @@ describe('gulp-webrequire', () => {
 
     // import the files
     require('../test-resources/main')
-    require('../test-resources/another-file')
-    require('../test-resources/module/jquery')
+    // require('../test-resources/another-file')
+    // require('../test-resources/module/jquery')
 
     g.window.registerModule([['./main.js', 'main.js']], 'hi', (module, exports, require) => {
       cb()
