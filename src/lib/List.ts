@@ -51,8 +51,36 @@ export default class List<T> extends Array<T> {
   }
 
   /**
+   * Returns a list containing all elements that only this list OR only the other list contains.
+   * @param other - The list to compare this list to.
+   * @example
+   * const a = new List(1, 2)
+   * const b = new list(2, 3)
+   * a.uncovered(b) // [ 1, 3 ]
+   */
+  public diff (other: T[]): List<T> {
+    const otherToThis = other.filter(element => !this.includes(element))
+    const thisToOther = this.filter(element => !other.includes(element))
+
+    return new List(...otherToThis, ...thisToOther)
+  }
+
+  /**
+   * Returns a list containing all elements of this list that are contained in the other array/list.
+   * @param other - The list to compare this list to.
+   * @example
+   * const a = new List(1, 2)
+   * const b = new list(2, 3)
+   * a.uncovered(b) // [ 2 ]
+   */
+  public covered (other: T[]): List<T> {
+    const thisToOther = this.filter(element => other.includes(element))
+    return new List(...thisToOther)
+  }
+
+  /**
    * Returns a list containing all elements of this list that are not contained in the other array/list.
-   * @param other - The list to compare this list to..
+   * @param other - The list to compare this list to.
    * @example
    * const a = new List(1, 2)
    * const b = new list(2, 3)
