@@ -32,6 +32,18 @@ gulp.task('typescript-plugin', function () {
   ])
 })
 
+const libTS = ts.createProject(TS_SETTINGS)
+gulp.task('typescript-lib', function () {
+
+  const tsResult = gulp.src(['src/lib/**/*.ts'])
+    .pipe(libTS())
+
+  return merge([
+    tsResult.dts.pipe(gulp.dest('build/lib')),
+    tsResult.js.pipe(gulp.dest('build/lib'))
+  ])
+})
+
 const cliTS = ts.createProject(TS_SETTINGS)
 
 gulp.task('typescript-cli', function () {
@@ -100,12 +112,13 @@ gulp.task('typescript-test-resources', function () {
 
 gulp.task('typescript-watch', function () {
   gulp.watch('src/plugin/**/*.ts', ['typescript-plugin'])
+  gulp.watch('src/lib/**/*.ts', ['typescript-lib'])
   gulp.watch('src/browser/**/*.ts', ['typescript-browser'])
   gulp.watch('src/cli/**/*.ts', ['typescript-cli'])
   gulp.watch('src/test/**/*.ts', ['typescript-test'])
   gulp.watch('src/test-resources/**/*.ts', ['typescript-test-resources'])
 })
 
-gulp.task('typescript', ['typescript-plugin', 'typescript-browser', 'typescript-cli'])
+gulp.task('typescript', ['typescript-lib', 'typescript-plugin', 'typescript-browser', 'typescript-cli'])
 gulp.task('test', ['typescript-test', 'typescript-test-resources'])
 gulp.task('default', ['typescript', 'test', 'typescript-watch'])
