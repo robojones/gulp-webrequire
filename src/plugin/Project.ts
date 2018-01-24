@@ -3,9 +3,9 @@ import * as path from 'path'
 import { Transform } from 'stream'
 import * as through from 'through2'
 import * as Vinyl from 'vinyl'
-import List from './List'
+import List from '../lib/List'
+import Storage from '../lib/Storage'
 import Parser, {ParserOptions} from './Parser'
-import Storage from './Storage'
 
 export interface ProjectOptions extends ParserOptions {
   /**
@@ -68,37 +68,78 @@ export default class Project {
     return stream
   }
 
-  private build (stream: Transform) {
+  private build (stream: Transform, entryPoints?: List<string>): void {
+
+    // Find initial entry points if none are passed.
+    if (!entryPoints) {
+      entryPoints = new List(...this.names.filter(key => {
+        return !this.requiredIn.get(key).length
+      }))
+    }
 
     const packs = new Storage<List<string>>(List)
 
-    for (const name of this.names) {
-      const trace = new List<string>(name)
+    // Generate basic packs.
+    for (const entryPoint of entryPoints) {
+      const pack = packs.get(entryPoint)
+      const discovered = new List<string>(entryPoint)
 
-      while (true) {
-        const current = trace[0]
-        const requiredIn = this.requiredIn.get(current)
-        const next = requiredIn[0]
+      let current
 
-        if (trace.includes(next)) {
-          // Circular structure detected.
-          break
-        }
-
-        if (requiredIn.length === 1) {
-          // File is required in only one other file -> file gets merged into next file.
-          trace.unshift(next)
-        } else {
-          // If file is not required anywhere or in mulitple files -> file becomes a pack.
-          break
-        }
-      }
-
-      // Add filename to pack.
-      const packname = trace[0]
-      packs.get(trace[0]).add(name)
+      do {
+        current = discovered.pop()
+        pack.add(current)
+        // Prevent duplicate detection in circular structures.
+        const requirements = this.requirements.get(current).uncovered(pack)
+        // Prevent entrypoints from being packed.
+        const noEntryPoints = requirements.uncovered(entryPoints)
+        // Add new requirements.
+        discovered.add(...noEntryPoints)
+      } while (discovered.length)
     }
 
+    // Find duplicate files.
+    const duplicate = new List<string>()
+
+    for (const packname of entryPoints) {
+      const pack = packs.get(packname)
+
+      for (const secondPackname of entryPoints) {
+        if (secondPackname === packname) {
+          continue
+        }
+
+        const secondPack = packs.get(secondPackname)
+
+        // Add files that are in multiple packages to duplicate.
+        duplicate.add(...pack.covered(secondPack))
+      }
+    }
+
+    const notDuplicate = this.names.uncovered(duplicate)
+
+    // Find new entry points.
+    for (const name of duplicate) {
+      const requiredIn = this.requiredIn.get(name).uncovered(notDuplicate)
+
+      if (!requiredIn.length) {
+        entryPoints.push(name)
+      }
+    }
+
+    if (duplicate.length) {
+      this.build(stream, entryPoints)
+    } else {
+      this.exportPacks(stream, packs)
+    }
+  }
+
+  /**
+   * Merges the packages into single files and writes them to the output stream.
+   * @param stream - The output stream.
+   * @param packs - A storage containing the packs.
+   */
+  private exportPacks (stream: Transform, packs: Storage<List<string>>): void {
     const packNames = packs.keys
 
     // Merge the files of the packs.
