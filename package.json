@@ -32,12 +32,9 @@
   },
   "homepage": "https://github.com/robojones/gulp-webrequire#readme",
   "devDependencies": {
-    "@types/esprima": "^4.0.1",
     "@types/gulp": "^4.0.5",
     "@types/mocha": "^2.2.44",
-    "@types/mz": "^0.0.32",
-    "@types/node": "^8.0.57",
-    "@types/through2": "^2.0.33",
+    "@types/node": "^9.3.0",
     "gulp": "^3.9.1",
     "gulp-minify": "^2.1.0",
     "gulp-sourcemaps": "^2.6.3",
@@ -50,6 +47,10 @@
     "typescript": "^2.6.2"
   },
   "dependencies": {
+    "@types/esprima": "^4.0.1",
+    "@types/mz": "^0.0.32",
+    "@types/through2": "^2.0.33",
+    "@types/vinyl": "^2.0.2",
     "concat-with-sourcemaps": "^1.0.5",
     "esprima": "^4.0.0",
     "mz": "^2.7.0",
