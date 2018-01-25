@@ -125,10 +125,12 @@ class Parser extends EventEmitter {
     const name = file.relative
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
     const prefix = Buffer.from(
-      `window.registerModule(${requirementString}, ${JSON.stringify(name)}, function (module, exports, require) {\n`
+      `window.registerModule(${requirementString}, ${JSON.stringify(name)}, function (module, exports, require) {try{\n`
     )
 
-    const postfix = Buffer.from('\n})\n')
+    const postfix = Buffer.from(
+      '\n} catch (error) {console.error(error)}})\n'
+    )
 
     const pre = new Vinyl({
       base: file.base,
@@ -163,7 +165,7 @@ class Parser extends EventEmitter {
   private initSourcemap (file: Vinyl, origin?: Vinyl) {
     let name: string
     if (origin) {
-      name = path.relative(origin.dirname, file.path)
+      name = null
     } else {
       name = file.relative
     }
