@@ -4,6 +4,7 @@ import { Transform } from 'stream'
 import * as through from 'through2'
 import * as Vinyl from 'vinyl'
 import List from '../lib/List'
+import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import Storage from '../lib/Storage'
 import Parser, {ParserOptions} from './Parser'
 
@@ -147,18 +148,15 @@ export default class Project {
       const pack = packs.get(packName)
       const mainFile = this.files[packName].clone({contents: true, deep: true})
 
-      const concat = new Concat(!!mainFile.sourceMap, path.basename(mainFile.path))
+      console.log('pack', pack)
 
-      for (const name of pack) {
-        const file = this.files[name]
-        concat.add(file.relative, file.contents, file.sourceMap)
-      }
+      // Note: The pack list includes the mainFile.
+      const files = pack.map(filename => this.files[filename])
 
-      mainFile.contents = concat.content
-
-      if (concat.sourceMap) {
-        mainFile.sourceMap = JSON.parse(concat.sourceMap)
-      }
+      mergeWithSourcemaps(mainFile, files, {
+        fixGulpSourcemaps: true,
+        typescript: true
+      })
 
       stream.push(mainFile)
     }

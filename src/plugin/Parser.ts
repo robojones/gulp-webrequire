@@ -1,8 +1,9 @@
-import Concat = require('concat-with-sourcemaps')
 import { EventEmitter } from 'events'
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
+import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
+import SourceMap from '../lib/SourceMap'
 import File from './File'
 import findRequirements from './findRequirements'
 
@@ -52,7 +53,7 @@ class Parser extends EventEmitter {
 
     const files = await Promise.all(promises)
 
-    origin.wrapper = this.wrap(requirements, origin)
+    this.wrap(requirements, origin)
 
     const requirementStrings = requirements.map(file => file.finalName)
 
@@ -99,7 +100,7 @@ class Parser extends EventEmitter {
       )
     }
 
-    file.wrapper = this.wrap([], file)
+    this.wrap([], file)
 
     this.emit('file', file, [])
   }
@@ -112,15 +113,7 @@ class Parser extends EventEmitter {
   private wrap (requirements: File[], file: Vinyl) {
     const { pre, post } = this.createWrappers(requirements, file)
 
-    const concat = new Concat(!!file.sourceMap, path.basename(file.path))
-    concat.add(pre.relative, pre.contents, pre.sourceMap)
-    concat.add(file.relative, file.contents, file.sourceMap)
-    concat.add(pre.relative, post.contents, post.sourceMap)
-
-    file.contents = concat.content
-    if (concat.sourceMap) {
-      file.sourceMap = JSON.parse(concat.sourceMap)
-    }
+    mergeWithSourcemaps(file, [pre, file, post])
   }
 
   /**
@@ -174,7 +167,8 @@ class Parser extends EventEmitter {
     } else {
       name = file.relative
     }
-    file.sourceMap = {
+
+    const sourceMap: SourceMap = {
       file: name,
       mappings: '',
       names: [],
@@ -182,6 +176,8 @@ class Parser extends EventEmitter {
       sourcesContent: [ file.contents.toString() ],
       version: 3,
     }
+
+    file.sourceMap = sourceMap
   }
 }
 
