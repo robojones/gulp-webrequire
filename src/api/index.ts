@@ -39,7 +39,7 @@ export default function generateTags (
   entryPoint: string | string[],
   options: {
     tagGenerator?: TagGenerator,
-    cacheTags?: false
+    cacheTags?: boolean
   } = {}
 ): string {
   let html = `<script>${snippet}</script>`
