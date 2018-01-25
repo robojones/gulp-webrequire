@@ -59,10 +59,10 @@ export default class List<T> extends Array<T> {
    * a.uncovered(b) // [ 1, 3 ]
    */
   public diff (other: T[]): List<T> {
-    const otherToThis = other.filter(element => !this.includes(element))
     const thisToOther = this.filter(element => !other.includes(element))
+    const otherToThis = other.filter(element => !this.includes(element))
 
-    return new List(...otherToThis, ...thisToOther)
+    return new List(...thisToOther, ...otherToThis)
   }
 
   /**
