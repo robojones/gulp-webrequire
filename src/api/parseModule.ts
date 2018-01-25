@@ -21,7 +21,7 @@ export const contentsCache: {
  * @param packname - The name of the pack relative to the base directory.
  */
 export default function parseModule (base: string, packname: string) {
-  if (!registeredCache[packname] || !requiredCache[packname]) {
+  if (!registeredCache[packname]) {
     run(base, packname)
   }
 
@@ -35,11 +35,11 @@ export default function parseModule (base: string, packname: string) {
 /**
  * Executes the contents of a file in a separate context. A callback gets called for each registered file..
  * @param base - The base directory of your public files.
- * @param pathname - The path to the file relative to the base directory.
+ * @param packname - The path to the file relative to the base directory.
  */
 export function run (
   base: string,
-  pathname: string,
+  packname: string,
 ): void {
   const registered = new List<string>()
   const required = new List<string>()
@@ -57,14 +57,14 @@ export function run (
   })
 
   // Read file.
-  const filePath = path.resolve(base, pathname)
+  const filePath = path.resolve(base, packname)
   const contents = fs.readFileSync(filePath)
   const code = contents.toString()
 
   // Run code in context with a window object.
   vm.runInContext(code, context)
 
-  contentsCache[filePath] = contents
-  registeredCache[filePath] = registered
-  requiredCache[filePath] = required
+  contentsCache[packname] = contents
+  registeredCache[packname] = registered
+  requiredCache[packname] = required
 }
