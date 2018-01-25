@@ -22,7 +22,7 @@ const tagCache: {
  * @example
  * (packagePath) => `<script src="https://somedomain.com/${packagePath}" async></script>`
  */
-type TagGenerator = (packagePath: string, contents: Buffer) => string
+export type TagGenerator = (packagePath: string, contents: Buffer) => string
 
 export const defaultTagGenerator: TagGenerator = (packagePath: string, contents: Buffer): string => {
   return `<script src="${path.join(path.sep, packagePath)}" async></script>`
