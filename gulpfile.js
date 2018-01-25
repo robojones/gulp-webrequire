@@ -48,7 +48,7 @@ const apiTS = ts.createProject(TS_SETTINGS)
 gulp.task('api', function () {
 
   const tsResult = gulp.src(['src/api/**/*.ts'])
-    .pipe(libTS())
+    .pipe(apiTS())
 
   return merge([
     tsResult.dts.pipe(gulp.dest('build/api')),
