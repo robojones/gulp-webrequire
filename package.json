@@ -4,9 +4,6 @@
   "typings": "build/plugin/index",
   "description": "Use require in the browser with this gulp plugin.",
   "version": "0.1.2",
-  "bin": {
-    "webrequire": "build/cli/index.js"
-  },
   "scripts": {
     "build": "gulp typescript",
     "build-test": "gulp test",
@@ -35,7 +32,6 @@
   },
   "homepage": "https://github.com/robojones/gulp-webrequire#readme",
   "devDependencies": {
-    "@types/commander": "^2.12.2",
     "@types/esprima": "^4.0.1",
     "@types/gulp": "^4.0.5",
     "@types/mocha": "^2.2.44",
@@ -54,7 +50,6 @@
     "typescript": "^2.6.2"
   },
   "dependencies": {
-    "commander": "^2.12.2",
     "concat-with-sourcemaps": "^1.0.5",
     "esprima": "^4.0.0",
     "mz": "^2.7.0",

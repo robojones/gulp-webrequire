@@ -56,19 +56,6 @@ gulp.task('api', function () {
   ])
 })
 
-const cliTS = ts.createProject(TS_SETTINGS)
-
-gulp.task('cli', function () {
-
-  const tsResult = gulp.src(['src/cli/**/*.ts'])
-    .pipe(cliTS())
-
-  return merge([
-    tsResult.dts.pipe(gulp.dest('build/cli')),
-    tsResult.js.pipe(gulp.dest('build/cli'))
-  ])
-})
-
 const browserTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
   target: 'es5',
   lib: ['es5', 'dom']
@@ -127,11 +114,10 @@ gulp.task('watch', function () {
   gulp.watch('src/lib/**/*.ts', ['lib'])
   gulp.watch('src/api/**/*.ts', ['api'])
   gulp.watch('src/browser/**/*.ts', ['browser'])
-  gulp.watch('src/cli/**/*.ts', ['cli'])
   gulp.watch('src/test/**/*.ts', ['test'])
   gulp.watch('src/test-resources/**/*.ts', ['test-resources'])
 })
 
-gulp.task('typescript', ['lib', 'plugin', 'api', 'browser', 'cli'])
+gulp.task('typescript', ['lib', 'plugin', 'api', 'browser'])
 gulp.task('test', ['test', 'test-resources'])
 gulp.task('default', ['typescript', 'test', 'watch'])
