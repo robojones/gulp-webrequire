@@ -5,9 +5,8 @@
   "description": "Use require in the browser with this gulp plugin.",
   "version": "0.1.2",
   "scripts": {
-    "build": "gulp typescript",
-    "build-test": "gulp test",
-    "test": "yarn build && yarn build-test && ./node_modules/mocha/bin/_mocha build/test"
+    "build": "gulp all && gulp test-resources",
+    "test": "yarn build && ./node_modules/mocha/bin/_mocha build/test"
   },
   "engines": {
     "node": ">=7.0.0"

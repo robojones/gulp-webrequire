@@ -19,42 +19,19 @@ const TS_SETTINGS = {
   pretty: true
 }
 
-const pluginTS = ts.createProject(TS_SETTINGS)
+const serverTS = ts.createProject(TS_SETTINGS)
+gulp.task('server', function () {
 
-gulp.task('plugin', function () {
-
-  const tsResult = gulp.src(['src/plugin/**/*.ts'])
-    .pipe(pluginTS())
+  const tsResult = gulp.src(['src/plugin/**/*.ts', 'src/lib/**/*.ts', 'src/api/**/*.ts', 'src/test/**/*.ts', 'src/index.ts'], {
+    base: 'src/'
+  }).pipe(serverTS())
 
   return merge([
-    tsResult.dts.pipe(gulp.dest('build/plugin')),
-    tsResult.js.pipe(gulp.dest('build/plugin'))
+    tsResult.dts.pipe(gulp.dest('build/')),
+    tsResult.js.pipe(gulp.dest('build/'))
   ])
 })
 
-const libTS = ts.createProject(TS_SETTINGS)
-gulp.task('lib', function () {
-
-  const tsResult = gulp.src(['src/lib/**/*.ts'])
-    .pipe(libTS())
-
-  return merge([
-    tsResult.dts.pipe(gulp.dest('build/lib')),
-    tsResult.js.pipe(gulp.dest('build/lib'))
-  ])
-})
-
-const apiTS = ts.createProject(TS_SETTINGS)
-gulp.task('api', function () {
-
-  const tsResult = gulp.src(['src/api/**/*.ts'])
-    .pipe(apiTS())
-
-  return merge([
-    tsResult.dts.pipe(gulp.dest('build/api')),
-    tsResult.js.pipe(gulp.dest('build/api'))
-  ])
-})
 
 const browserTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
   target: 'es5',
@@ -74,19 +51,6 @@ gulp.task('browser', function () {
         min: '.min.js'
       }
     }).on('error', console.log)).pipe(gulp.dest('build/browser'))
-  ])
-})
-
-const testTS = ts.createProject(TS_SETTINGS)
-
-gulp.task('test', function () {
-
-  const tsResult = gulp.src(['src/test/**/*.ts'])
-    .pipe(testTS())
-
-  return merge([
-    tsResult.dts.pipe(gulp.dest('build/test')),
-    tsResult.js.pipe(gulp.dest('build/test'))
   ])
 })
 
@@ -110,14 +74,11 @@ gulp.task('test-resources', function () {
 })
 
 gulp.task('watch', function () {
-  gulp.watch('src/plugin/**/*.ts', ['plugin'])
-  gulp.watch('src/lib/**/*.ts', ['lib'])
-  gulp.watch('src/api/**/*.ts', ['api'])
+  gulp.watch(['src/plugin/**/*.ts', 'src/lib/**/*.ts', 'src/api/**/*.ts', 'src/test/**/*.ts'], ['server'])
   gulp.watch('src/browser/**/*.ts', ['browser'])
-  gulp.watch('src/test/**/*.ts', ['test'])
   gulp.watch('src/test-resources/**/*.ts', ['test-resources'])
 })
 
-gulp.task('typescript', ['lib', 'plugin', 'api', 'browser'])
-gulp.task('test', ['test', 'test-resources'])
-gulp.task('default', ['typescript', 'test', 'watch'])
+gulp.task('all', ['server', 'browser'])
+
+gulp.task('default', ['all', 'watch'])
