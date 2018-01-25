@@ -11,7 +11,3 @@ import Project, { ProjectOptions } from './Project'
 export default function webrequire (options: ProjectOptions = {}): Project {
   return new Project(options)
 }
-
-const snippetPath = require.resolve('../browser/snippet.min.js')
-/** A string containing the inline snippet of the current webrequire version. */
-export const snippet = fs.readFileSync(snippetPath).toString()
