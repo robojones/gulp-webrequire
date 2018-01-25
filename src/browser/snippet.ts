@@ -11,7 +11,7 @@
   function registerModule (
     requirements: Array<[string, string]>,
     name: string,
-    contents: (module: { exports: {} }, exports: {}, require: (modulename: string) => any) => void
+    contents: (module: { exports: any }, exports: any, require: (modulename: string) => any) => void
   ) {
     let queue = requirements.map(r => r[1])
 
@@ -19,7 +19,11 @@
       if (cache[realPath]) {
         removeFromQueue(realPath)
       } else {
-        addCallback(realPath, () => {
+        if (!callbacks[realPath]) {
+          callbacks[realPath] = []
+        }
+
+        callbacks[realPath].push(() => {
           removeFromQueue(realPath)
           execute()
         })
@@ -35,20 +39,20 @@
 
     /** Tries to execute the module. Aborts if not all requirements are met. */
     function execute () {
-      if (queue.length) {
-        return
-      }
-      const module = {
-        exports: {}
-      }
+      if (!queue.length) {
 
-      contents(module, module.exports, localRequire)
+        const module = {
+          exports: {}
+        }
 
-      cache[name] = module.exports
+        contents(module, module.exports, localRequire)
 
-      // trigger the callbacks
-      if (callbacks[name]) {
-        callbacks[name].forEach(cb => cb())
+        cache[name] = module.exports
+
+        // trigger the callbacks
+        if (callbacks[name]) {
+          callbacks[name].forEach(cb => cb())
+        }
       }
     }
 
@@ -59,15 +63,6 @@
       })[0][1]
 
       return cache[realname]
-    }
-
-    /** Adds a callback for a module. */
-    function addCallback (modulename: string, callback: () => void) {
-      if (!callbacks[modulename]) {
-        callbacks[modulename] = []
-      }
-
-      callbacks[modulename].push(callback)
     }
   }
 
