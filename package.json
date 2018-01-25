@@ -3,7 +3,7 @@
   "main": "build/index",
   "typings": "build/plugin/index",
   "description": "Use require in the browser with this gulp plugin.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "scripts": {
     "build": "gulp all && gulp test-resources",
     "test": "yarn build && ./node_modules/mocha/bin/_mocha build/test"
