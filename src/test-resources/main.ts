@@ -1,4 +1,4 @@
-import A from './another-file'
+// import A from './another-file'
 import * as $ from './test-dir/file'
 
 export function test (condition: any, msg: string): void {
@@ -8,4 +8,4 @@ export function test (condition: any, msg: string): void {
 }
 
 test($, 'jquery was not imported.')
-test((new A().value), 'another-file.js was not imported.')
+// test((new A().value), 'another-file.js was not imported.')
