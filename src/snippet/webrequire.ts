@@ -1,9 +1,16 @@
 type Requirements = Array<[string, string]>
 type Name = string
 type Code = (module: { exports: any }, exports: any, require: (modulename: string) => any) => void
+type RegisterModuleArguments = [Requirements, Name, Code]
 
 (() => {
   const w = window as any
+  if (w.registerModule && !w.moduleQueue) {
+    // The file is being parsed.
+    return
+  }
+
+
   const cache: { [name: string]: any } = {}
   const callbacks: { [name: string]: Array<() => void> } = {}
 
@@ -13,7 +20,7 @@ type Code = (module: { exports: any }, exports: any, require: (modulename: strin
    * @param name - The name of the module.
    * @param contents - A function containing the module.
    */
-  w.registerModule = function registerModule (params: [Requirements, Name, Code]) {
+  w.registerModule = function registerModule (params: RegisterModuleArguments) {
     const [
       requirements,
       name,
