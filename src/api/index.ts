@@ -26,13 +26,23 @@ export const defaultTagGenerator: TagGenerator = (packagePath: string, contents:
  * Generate script tags for all packs that are related to your entry point(s).
  * @param base - The directory that contains your public javascript files.
  * @param entryPoints - Entry points to your code relative to the base directory. (The file extension should be set.)
- * @param tagGenerator - A function that generates script tags.
+ * @param options - A function that generates script tags.
  */
 export default function generateTags (
   base: string,
   entryPoint: string | string[],
   options: {
+    /**
+     * A custom function that gets the path to the file and its contents passed.
+     * It returns a string containing the html script-tag for the given file.
+     */
     tagGenerator?: TagGenerator,
+    /**
+     * Gulp-webrequire will cache the results of the tagGenerator.
+     * The tagGenerator will never be called with the same path twice.
+     * This option lets you disable the cache by setting it to false.
+     * (default: true)
+     */
     cacheTags?: boolean
   } = {}
 ): string {
