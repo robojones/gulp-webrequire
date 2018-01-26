@@ -46,7 +46,12 @@ export function run (
 
   const context = vm.createContext({
     window: {
-      registerModule (requirements: Array<[string, string]>, name: string) {
+      registerModule (args: [Array<[string, string]>, string]) {
+        const [
+          requirements,
+          name
+        ] = args
+
         for (const [, requirement] of requirements) {
           required.add(requirement)
         }
