@@ -1,4 +1,5 @@
 import * as Concat from 'concat-with-sourcemaps'
+import * as fs from 'fs'
 import * as path from 'path'
 import { Transform } from 'stream'
 import * as through from 'through2'
@@ -6,8 +7,14 @@ import * as Vinyl from 'vinyl'
 import List from '../lib/List'
 import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import Storage from '../lib/Storage'
-import getSnippet from './getSnippet'
+import getBrowserLib from './getBrowserLib'
 import Parser, {ParserOptions} from './Parser'
+
+const prefixPath = require.resolve('../snippet/packagePrefix')
+/** A snippet of code that initializes the registerModule method
+ * in the beginning of the package, if it does not exist yet.
+ */
+const packagePrefix = fs.readFileSync(prefixPath).toString()
 
 export interface ProjectOptions {
   /**
@@ -51,7 +58,7 @@ export default class Project {
 
       if (!this.files[snippetName]) {
         // Init snippet.
-        this.files[snippetName] = getSnippet(file.cwd, file.base, this.options.modulesDir)
+        this.files[snippetName] = getBrowserLib(file.cwd, file.base, this.options.modulesDir)
         this.names.add(snippetName)
       }
 
@@ -176,7 +183,10 @@ export default class Project {
       const mainFile = this.files[packName].clone({contents: true, deep: true})
 
       // Note: The pack list includes the mainFile.
-      const files = pack.map(filename => this.files[filename])
+      const files: Array<Vinyl|string> = pack.map(filename => this.files[filename])
+
+      // Add the prefix.
+      files.unshift(packagePrefix)
 
       mergeWithSourcemaps(mainFile, files, {
         fixGulpSourcemaps: true,
