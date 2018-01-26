@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as Vinyl from 'vinyl'
 import initSourcemap from '../lib/initSourcemap'
 
-const snippetPath = require.resolve('../browser/snippet.min.js')
+const snippetPath = require.resolve('../snippet/webrequire.min.js')
 
 const stat = fs.statSync(snippetPath)
 
