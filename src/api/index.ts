@@ -1,13 +1,7 @@
-import * as fs from 'fs'
 import * as path from 'path'
 import List from '../lib/List'
 import getRelatedPacks from './getRelatedPacks'
 import contentsCache from './parseModule'
-
-
-const snippetPath = require.resolve('../browser/snippet.min.js')
-/** A string containing the inline snippet of the current webrequire version. */
-export const snippet = fs.readFileSync(snippetPath).toString()
 
 /**
  * Contains all related packs of a pack.
@@ -42,7 +36,7 @@ export default function generateTags (
     cacheTags?: boolean
   } = {}
 ): string {
-  let html = `<script>${snippet}</script>`
+  let html = ''
 
   const entryPoints: string[] = Array.isArray(entryPoint) ? entryPoint : [entryPoint]
   const related = getRelatedPacks(base, ...entryPoints)

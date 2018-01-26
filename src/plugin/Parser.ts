@@ -10,11 +10,9 @@ import findRequirements from './findRequirements'
 
 export interface ParserOptions {
   /**
-   * The directory that external modules get imported to. (default: 'modules')
-   * @example
-   * { modulesDir: 'lib' }
+   * The directory that external modules get imported to.
    */
-  modulesDir?: string
+  modulesDir: string
   [option: string]: any
 }
 
@@ -95,7 +93,7 @@ class Parser extends EventEmitter {
 
     initSourcemap(file)
 
-    if (findRequirements(file).length) {
+    if (findRequirements(file, this.options.modulesDir).length) {
       throw new Error(
         `External modules are not allowed to require other modules! (${originalPath})`
       )

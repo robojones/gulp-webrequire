@@ -7,7 +7,7 @@ import File from './File'
  * @param origin - The file that contains the code of the program.
  * @param modulesDir - The directory that contains imported modules.
  */
-export default function findRequirements (origin: Vinyl, modulesDir: string = 'modules'): File[] {
+export default function findRequirements (origin: Vinyl, modulesDir: string): File[] {
   const tokens = tokenize(origin.contents.toString())
   const result: File[] = []
   let waitForString = false

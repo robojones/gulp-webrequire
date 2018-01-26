@@ -10,12 +10,12 @@ const stat = fs.statSync(snippetPath)
 /** A string containing the inline snippet of the current webrequire version. */
 export const snippet = fs.readFileSync(snippetPath)
 
-export default function importSnippet (cwd: string, base: string): Vinyl {
+export default function getSnippet (cwd: string, base: string, modulesDir: string): Vinyl {
   const file = new Vinyl({
     base,
     contents: snippet,
     cwd,
-    path: path.resolve(base, 'module(/webrequire.js'),
+    path: path.join(cwd, base, modulesDir, 'webrequire.js'),
     stat,
   })
 

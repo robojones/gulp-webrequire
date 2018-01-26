@@ -6,9 +6,10 @@ import * as Vinyl from 'vinyl'
 import List from '../lib/List'
 import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import Storage from '../lib/Storage'
+import getSnippet from './getSnippet'
 import Parser, {ParserOptions} from './Parser'
 
-export interface ProjectOptions extends ParserOptions {
+export interface ProjectOptions {
   /**
    * If set to false no packages will be generated.
    * All input files will stay separate files.
@@ -17,6 +18,13 @@ export interface ProjectOptions extends ParserOptions {
    * { smartPacking: false }
    */
   smartPacking?: boolean
+
+  /**
+   * The directory that external modules get imported to. (default: 'module')
+   * @example
+   * { modulesDir: 'lib' }
+   */
+  modulesDir?: string
 }
 
 export default class Project {
@@ -29,11 +37,30 @@ export default class Project {
   private requiredIn = new Storage<List<string>>(List)
 
   constructor (options: ProjectOptions) {
+
+    if (!options.modulesDir) {
+      options.modulesDir = 'module'
+    }
+
     this.options = options
-    this.parser = new Parser(options)
+    this.parser = new Parser(options as ParserOptions)
 
     this.parser.on('file', (file, requirements) => {
       const current = file.relative
+      const snippetName = path.join(this.options.modulesDir, 'snippet.ts')
+
+      if (!this.files[snippetName]) {
+        // Init snippet.
+        this.files[snippetName] = getSnippet(file.cwd, file.base, this.options.modulesDir)
+        this.names.add(snippetName)
+      }
+
+      // Set all files as requirements for the snippet.
+      const namesExcludingSnippet = this.names.uncovered([snippetName])
+      this.requirements.set(snippetName, namesExcludingSnippet)
+
+      // Add snippet to requirements of this file.
+      requirements.push(snippetName)
 
       // Remove old requirements of this file from requiredIn.
       const oldRequirements = this.requirements.get(current)
@@ -60,7 +87,7 @@ export default class Project {
    */
   public through (): Transform {
     const stream = through.obj((file: Vinyl, enc, cb) => {
-      this.parser.parse(file).then(() => cb()).catch(cb)
+      this.parser.parse(file).then(() => cb()).catch(err => stream.emit('error', err))
     }, (cb) => {
       this.build(stream)
       cb()
@@ -69,7 +96,7 @@ export default class Project {
     return stream
   }
 
-  private build (stream: Transform, entryPoints?: List<string>): void {
+  private build (stream: Transform, entryPoints ?: List<string>): void {
 
     // Find initial entry points if none are passed.
     if (!entryPoints) {
@@ -147,8 +174,6 @@ export default class Project {
     for (const packName of packNames) {
       const pack = packs.get(packName)
       const mainFile = this.files[packName].clone({contents: true, deep: true})
-
-      console.log('pack', pack)
 
       // Note: The pack list includes the mainFile.
       const files = pack.map(filename => this.files[filename])
