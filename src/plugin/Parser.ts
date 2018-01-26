@@ -110,49 +110,14 @@ class Parser extends EventEmitter {
    * @param file - A vinyl object representing the file.
    */
   private wrap (requirements: File[], file: Vinyl) {
-    const { pre, post } = this.createWrappers(requirements, file)
-
-    mergeWithSourcemaps(file, [pre, file, post])
-  }
-
-  /**
-   * Creates the prefix and suffix (with sourcemaps) for the file.
-   * @param requirements - An array of arrays representing the requirements for the file.
-   * @param file - A vinyl object representing the file.
-   */
-  private createWrappers (requirements: File[], file: Vinyl): {post: Vinyl, pre: Vinyl} {
     const name = file.relative
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
-    const prefix = Buffer.from(
-      `window.registerModule(${requirementString}, ${JSON.stringify(name)}, function (module, exports, require) {try{\n`
-    )
+    const n = JSON.stringify(name)
+    const prefix = `window.registerModule(${requirementString}, ${n}, function (module, exports, require) {try{\n`
 
-    const postfix = Buffer.from(
-      '\n} catch (error) {console.error(error)}})\n'
-    )
+    const postfix = '\n} catch (error) {console.error(error)}})\n'
 
-    const pre = new Vinyl({
-      base: file.base,
-      contents: prefix,
-      cwd: file.cwd,
-      path: path.join(file.base, 'webrequire', file.relative + '.part1'),
-    })
-
-    pre.sourceMap = initSourcemap(null, prefix)
-
-    const post = new Vinyl({
-      base: file.base,
-      contents: postfix,
-      cwd: file.cwd,
-      path: path.join(file.base, 'webrequire', file.relative + '.part2'),
-    })
-
-    post.sourceMap = initSourcemap(null, postfix)
-
-    return {
-      post,
-      pre
-    }
+    mergeWithSourcemaps(file, [prefix, file, postfix])
   }
 }
 
