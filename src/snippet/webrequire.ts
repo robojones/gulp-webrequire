@@ -27,8 +27,6 @@ type RegisterModuleArguments = [Requirements, Name, Code]
       contents
     ] = params
 
-    console.log('w.registerModule', name)
-
     let queue = requirements.map(r => r[1])
 
     requirements.forEach(([localName, realPath]) => {
