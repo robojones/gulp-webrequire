@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as Vinyl from 'vinyl'
 import initSourcemap from '../lib/initSourcemap'
 
-const snippetPath = require.resolve('../snippet/webrequire.min.js')
+const snippetPath = require.resolve('../snippet/webrequire.js')
 
 const stat = fs.statSync(snippetPath)
 
@@ -15,7 +15,7 @@ export default function getSnippet (cwd: string, base: string, modulesDir: strin
     base,
     contents: snippet,
     cwd,
-    path: path.join(cwd, base, modulesDir, 'webrequire.js'),
+    path: path.join(base, modulesDir, 'webrequire.js'),
     stat,
   })
 
