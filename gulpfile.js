@@ -33,24 +33,19 @@ gulp.task('server', function () {
 })
 
 
-const browserTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
+const snippetTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
+  declaration: false,
   target: 'es5',
   lib: ['es5', 'dom']
 }))
 
-gulp.task('browser', function () {
+gulp.task('snippet', function () {
 
-  const tsResult = gulp.src('src/browser/**/*.ts')
-    .pipe(browserTS())
+  const tsResult = gulp.src('src/snippet/**/*.ts')
+    .pipe(snippetTS())
 
   return merge([
-    tsResult.dts.pipe(gulp.dest('build/browser')),
-    tsResult.js.pipe(minify({
-      ext: {
-        src: '.js',
-        min: '.min.js'
-      }
-    }).on('error', console.log)).pipe(gulp.dest('build/browser'))
+    tsResult.js.pipe(gulp.dest('build/snippet'))
   ])
 })
 
@@ -59,7 +54,7 @@ const resourcesTS = ts.createProject(TS_SETTINGS)
 gulp.task('test-resources', function () {
 
   const tsResult = gulp.src('src/test-resources/**/*.ts')
-  .pipe(sourcemaps.init())  
+  .pipe(sourcemaps.init())
   .pipe(resourcesTS())
 
   const webrequire = require('.').default
@@ -75,10 +70,10 @@ gulp.task('test-resources', function () {
 
 gulp.task('watch', function () {
   gulp.watch(['src/plugin/**/*.ts', 'src/lib/**/*.ts', 'src/api/**/*.ts', 'src/test/**/*.ts'], ['server'])
-  gulp.watch('src/browser/**/*.ts', ['browser'])
+  gulp.watch('src/snippet/**/*.ts', ['snippet'])
   gulp.watch('src/test-resources/**/*.ts', ['test-resources'])
 })
 
-gulp.task('all', ['server', 'browser'])
+gulp.task('all', ['server', 'snippet'])
 
 gulp.task('default', ['all', 'watch'])
