@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
+import initSourcemap from '../lib/initSourcemap'
 import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import SourceMap from '../lib/SourceMap'
 import File from './File'
@@ -92,7 +93,7 @@ class Parser extends EventEmitter {
       stat,
     }) as Vinyl
 
-    this.initSourcemap(file)
+    initSourcemap(file)
 
     if (findRequirements(file).length) {
       throw new Error(
@@ -139,7 +140,7 @@ class Parser extends EventEmitter {
       path: path.join(file.base, 'webrequire', file.relative + '.part1'),
     })
 
-    this.initSourcemap(pre, file)
+    initSourcemap(pre, { noSource: true })
 
     const post = new Vinyl({
       base: file.base,
@@ -148,38 +149,12 @@ class Parser extends EventEmitter {
       path: path.join(file.base, 'webrequire', file.relative + '.part2'),
     })
 
-    this.initSourcemap(post, file)
+    initSourcemap(post, { noSource: true })
 
     return {
       post,
       pre
     }
-  }
-
-  /**
-   * Initializes a sourcemap for the file.
-   * @param file - The file to apply the sourcemaps.
-   * @param origin - An optional origin file. The file path in the sourcemap will be relative to this file.
-   * If not provided, the sourcemap will be relative to the base directory.
-   */
-  private initSourcemap (file: Vinyl, origin?: Vinyl) {
-    let name: string
-    if (origin) {
-      name = null
-    } else {
-      name = file.relative
-    }
-
-    const sourceMap: SourceMap = {
-      file: name,
-      mappings: '',
-      names: [],
-      sources: [ name ],
-      sourcesContent: [ file.contents.toString() ],
-      version: 3,
-    }
-
-    file.sourceMap = sourceMap
   }
 }
 
