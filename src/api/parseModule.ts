@@ -42,7 +42,7 @@ export function run (
   packname: string,
 ): void {
   const registered = new List<string>()
-  const required = new List<string>()
+  const required = new List<string>('module/webrequire.js')
 
   const context = vm.createContext({
     window: {

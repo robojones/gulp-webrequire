@@ -19,7 +19,7 @@ const tagCache: {
 export type TagGenerator = (packagePath: string, contents: Buffer) => string
 
 export const defaultTagGenerator: TagGenerator = (packagePath: string, contents: Buffer): string => {
-  return `<script src="${path.join(path.sep, packagePath)}" async></script>`
+  return `<script src="${packagePath}" async></script>`
 }
 
 /**
