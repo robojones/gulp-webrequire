@@ -1,4 +1,9 @@
-(window as any).registerModule = (() => {
+type Requirements = Array<[string, string]>
+type Name = string
+type Code = (module: { exports: any }, exports: any, require: (modulename: string) => any) => void
+
+(() => {
+  const w = window as any
   const cache: { [name: string]: any } = {}
   const callbacks: { [name: string]: Array<() => void> } = {}
 
@@ -8,11 +13,15 @@
    * @param name - The name of the module.
    * @param contents - A function containing the module.
    */
-  function registerModule (
-    requirements: Array<[string, string]>,
-    name: string,
-    contents: (module: { exports: any }, exports: any, require: (modulename: string) => any) => void
-  ) {
+  w.registerModule = function registerModule (params: [Requirements, Name, Code]) {
+    const [
+      requirements,
+      name,
+      contents
+    ] = params
+
+    console.log('w.registerModule', name)
+
     let queue = requirements.map(r => r[1])
 
     requirements.forEach(([localName, realPath]) => {
@@ -45,7 +54,11 @@
           exports: {}
         }
 
-        contents(module, module.exports, localRequire)
+        try {
+          contents(module, module.exports, localRequire)
+        } catch (error) {
+          console.error(error)
+        }
 
         cache[name] = module.exports
 
@@ -66,5 +79,8 @@
     }
   }
 
-  return registerModule
+  // Register modules that have been loaded before webrequire.
+  w.moduleQueue.forEach(e => {
+    w.registerModule(e)
+  })
 })()
