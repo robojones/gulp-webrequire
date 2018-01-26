@@ -91,7 +91,7 @@ class Parser extends EventEmitter {
       stat,
     }) as Vinyl
 
-    initSourcemap(file)
+    file.sourceMap = initSourcemap(file.relative, contents)
 
     if (findRequirements(file, this.options.modulesDir).length) {
       throw new Error(
@@ -138,7 +138,7 @@ class Parser extends EventEmitter {
       path: path.join(file.base, 'webrequire', file.relative + '.part1'),
     })
 
-    initSourcemap(pre, { noSource: true })
+    pre.sourceMap = initSourcemap(null, prefix)
 
     const post = new Vinyl({
       base: file.base,
@@ -147,7 +147,7 @@ class Parser extends EventEmitter {
       path: path.join(file.base, 'webrequire', file.relative + '.part2'),
     })
 
-    initSourcemap(post, { noSource: true })
+    post.sourceMap = initSourcemap(null, postfix)
 
     return {
       post,

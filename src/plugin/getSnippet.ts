@@ -19,7 +19,7 @@ export default function getSnippet (cwd: string, base: string, modulesDir: strin
     stat,
   })
 
-  initSourcemap(file)
+  file.sourceMap = initSourcemap(file.relative, file.contents)
 
   return file
 }
