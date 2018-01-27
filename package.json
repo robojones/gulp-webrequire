@@ -3,7 +3,7 @@
   "main": "build/index",
   "typings": "build/index",
   "description": "Use require in the browser with this gulp plugin.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "scripts": {
     "build": "gulp all && gulp test-resources",
     "watch": "yarn build && gulp watch",
