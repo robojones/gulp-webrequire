@@ -4,7 +4,7 @@ type Code = (module: { exports: any }, exports: any, require: (modulename: strin
 type RegisterModuleArguments = [Requirements, Name, Code]
 
 // Register module so it can be detected in packs.
-(window as any).registerModule([[], 'webrequire', () => {}]);
+(window as any).registerModule([[], 'webrequire.js', () => {}]);
 
 (() => {
   const w = window as any

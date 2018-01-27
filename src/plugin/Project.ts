@@ -54,17 +54,13 @@ export default class Project {
 
     this.parser.on('file', (file, requirements) => {
       const current = file.relative
-      const snippetName = path.join(this.options.modulesDir, 'snippet.ts')
+      const snippetName = path.join(this.options.modulesDir, 'webrequire.ts')
 
       if (!this.files[snippetName]) {
         // Init snippet.
         this.files[snippetName] = getBrowserLib(file.cwd, file.base, this.options.modulesDir)
         this.names.add(snippetName)
       }
-
-      // Set all files as requirements for the snippet.
-      const namesExcludingSnippet = this.names.uncovered([snippetName])
-      this.requirements.set(snippetName, namesExcludingSnippet)
 
       // Add snippet to requirements of this file.
       requirements.push(snippetName)

@@ -44,22 +44,25 @@ export function run (
   const registered = new List<string>()
   const required = new List<string>('module/webrequire.js')
 
-  const context = vm.createContext({
-    window: {
-      registerModule (args: [Array<[string, string]>, string]) {
-        const [
-          requirements,
-          name
-        ] = args
+  const fakeWindow = {
+    registerModule (args: [Array<[string, string]>, string]) {
+      const [
+        requirements,
+        name,
+      ] = args
 
-        for (const [, requirement] of requirements) {
-          required.add(requirement)
-        }
-
-        registered.add(name)
+      for (const [, requirement] of requirements) {
+        required.add(requirement)
       }
-    }
-  })
+
+      registered.add(name)
+    },
+    window: null
+  }
+
+  fakeWindow.window = fakeWindow
+
+  const context = vm.createContext(fakeWindow)
 
   // Read file.
   const filePath = path.resolve(base, packname)
