@@ -1,7 +1,5 @@
 import * as path from 'path'
 import List from '../lib/List'
-import getRelatedPacks from './getRelatedPacks'
-import contentsCache from './parseModule'
 
 /**
  * Contains all related packs of a pack.
@@ -16,9 +14,9 @@ const tagCache: {
  * @example
  * (packagePath) => `<script src="https://somedomain.com/${packagePath}" async></script>`
  */
-export type TagGenerator = (packagePath: string, contents: Buffer) => string
+export type TagGenerator = (packagePath: string) => string
 
-export const defaultTagGenerator: TagGenerator = (packagePath: string, contents: Buffer): string => {
+export const defaultTagGenerator: TagGenerator = (packagePath: string): string => {
   return `<script src="${packagePath}" async></script>`
 }
 
@@ -46,15 +44,22 @@ export default function generateTags (
     cacheTags?: boolean
   } = {}
 ): string {
+  const mappings = require(path.resolve(base, 'mappings.js'))
+  const files = (Array.isArray(entryPoint)) ? entryPoint : [entryPoint]
+  const packs = new List<string>()
+
+  for (const file of files) {
+    packs.add(...mappings[file])
+  }
+
   let html = ''
 
-  const entryPoints: string[] = Array.isArray(entryPoint) ? entryPoint : [entryPoint]
-  const related = getRelatedPacks(base, ...entryPoints)
   const tagGenerator: TagGenerator = options.tagGenerator || defaultTagGenerator
 
-  for (const pack of related) {
+  for (const pack of packs) {
     if (!tagCache[pack] || options.cacheTags === false) {
-      const tag = tagGenerator(pack, contentsCache[pack])
+      // set/overwrite tagCache
+      const tag = tagGenerator(pack)
 
       if (typeof tag !== 'string') {
         throw new Error('options.tagGenerator must return a string. Instead got: ' + typeof tag)
