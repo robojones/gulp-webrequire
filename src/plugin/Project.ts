@@ -207,8 +207,6 @@ export default class Project {
       mappings[filename] = relatedPacks
     }
 
-    console.log('mappings:', mappings)
-
     const mappingsData = 'module.exports = ' + JSON.stringify(mappings, null, 2)
     const outputFile = this.createVinyl('mappings.js', Buffer.from(mappingsData))
 
