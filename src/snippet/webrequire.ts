@@ -3,16 +3,8 @@ type Name = string
 type Code = (module: { exports: any }, exports: any, require: (modulename: string) => any) => void
 type RegisterModuleArguments = [Requirements, Name, Code]
 
-// Register module so it can be detected in packs.
-(window as any).registerModule([[], 'webrequire.js', () => {}]);
-
 (() => {
   const w = window as any
-  if (w.registerModule && !w.moduleQueue) {
-    // The file is being parsed.
-    return
-  }
-
 
   const cache: { [name: string]: any } = {}
   const callbacks: { [name: string]: Array<() => void> } = {}
