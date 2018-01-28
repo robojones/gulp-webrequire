@@ -4,3 +4,4 @@ assets/
 coverage/
 config.json
 *.log
+test.html
