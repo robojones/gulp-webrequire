@@ -1,5 +1,6 @@
+const Charcoder = require('charcoder')
 import * as Concat from 'concat-with-sourcemaps'
-import * as fs from 'fs'
+import { fs } from 'mz'
 import * as path from 'path'
 import { Transform } from 'stream'
 import * as through from 'through2'
@@ -9,6 +10,8 @@ import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import Storage from '../lib/Storage'
 import getBrowserLib from './getBrowserLib'
 import Parser, {ParserOptions} from './Parser'
+
+const b62 = new Charcoder(Charcoder.B62)
 
 const prefixPath = require.resolve('../snippet/packagePrefix')
 /** A snippet of code that initializes the registerModule method
@@ -34,6 +37,17 @@ export interface ProjectOptions {
   modulesDir?: string
 }
 
+type PackList = Array<{
+  name: string,
+  entryPoints: List<string>
+  files: string[]
+}>
+
+/** Contains the names of all files the names of their pack. */
+interface Locations {
+  [filename: string]: string
+}
+
 export default class Project {
   private options: ProjectOptions
   private parser: Parser
@@ -54,7 +68,7 @@ export default class Project {
 
     this.parser.on('file', (file, requirements) => {
       const current = file.relative
-      const snippetName = path.join(this.options.modulesDir, 'webrequire.ts')
+      const snippetName = path.join(this.options.modulesDir, 'webrequire.js')
 
       if (!this.files[snippetName]) {
         // Init snippet.
@@ -90,79 +104,60 @@ export default class Project {
    */
   public through (): Transform {
     const stream = through.obj((file: Vinyl, enc, cb) => {
-      this.parser.parse(file).then(() => cb()).catch(err => stream.emit('error', err))
+      this.parser.parse(file).then(cb).catch(err => stream.emit('error', err))
     }, (cb) => {
-      this.build(stream)
-      cb()
+      this.build(stream).then(cb).catch(err => stream.emit('error', err))
     })
 
     return stream
   }
 
-  private build (stream: Transform, entryPoints ?: List<string>): void {
+  private async build (stream: Transform): Promise<void> {
+    const packs: PackList = []
+    const locations: Locations = {}
 
     // Find initial entry points if none are passed.
-    if (!entryPoints) {
-      entryPoints = new List(...this.names.filter(key => {
-        return !this.requiredIn.get(key).length
-      }))
-    }
+    const entryPoints = new Storage<List<string>>(List)
 
-    const packs = new Storage<List<string>>(List)
-
-    // Generate basic packs.
-    for (const entryPoint of entryPoints) {
-      const pack = packs.get(entryPoint)
-      const discovered = new List<string>(entryPoint)
-
-      let current
-
-      do {
-        current = discovered.pop()
-        pack.add(current)
-        // Prevent duplicate detection in circular structures.
-        const requirements = this.requirements.get(current).uncovered(pack)
-        // Prevent entrypoints from being packed.
-        const noEntryPoints = requirements.uncovered(entryPoints)
-        // Add new requirements.
-        discovered.add(...noEntryPoints)
-      } while (discovered.length)
-    }
-
-    // Find duplicate files.
-    const duplicate = new List<string>()
-
-    for (const packname of entryPoints) {
-      const pack = packs.get(packname)
-
-      for (const secondPackname of entryPoints) {
-        if (secondPackname === packname) {
-          continue
+    // Find entryPoints for each file.
+    for (const filename of this.names) {
+      const queue = new List<string>(filename)
+      for (const current of queue) {
+        const requiredIn = this.requiredIn.get(current)
+        if (requiredIn.length) {
+          queue.add(...requiredIn)
+        } else {
+          entryPoints.get(filename).add(current)
         }
-
-        const secondPack = packs.get(secondPackname)
-
-        // Add files that are in multiple packages to duplicate.
-        duplicate.add(...pack.covered(secondPack))
       }
     }
 
-    const notDuplicate = this.names.uncovered(duplicate)
+    // Group by same entry points.
+    for (const filename of this.names) {
+      const entry = entryPoints.get(filename)
 
-    // Find new entry points.
-    for (const name of duplicate) {
-      const requiredIn = this.requiredIn.get(name).uncovered(notDuplicate)
+      // Find pack if it already exists.
+      let pack = packs.find(p => {
+        return p.entryPoints.diff(entry).length === 0
+      })
 
-      if (!requiredIn.length) {
-        entryPoints.push(name)
+      if (!pack) {
+        // Create new pack.
+        pack = {
+          entryPoints: entry,
+          files: [],
+          name: b62.encode(packs.length) + '.js'
+        }
+        packs.push(pack)
       }
+
+      // Add this file to pack.
+      pack.files.push(filename)
+      locations[filename] = pack.name
     }
 
-    if (duplicate.length) {
-      this.build(stream, entryPoints)
-    } else {
-      this.exportPacks(stream, packs)
-    }
+    this.exportPacks(stream, packs)
+    await this.exportMappings(stream, locations)
   }
 
   /**
@@ -170,16 +165,13 @@ export default class Project {
    * @param stream - The output stream.
    * @param packs - A storage containing the packs.
    */
-  private exportPacks (stream: Transform, packs: Storage<List<string>>): void {
-    const packNames = packs.keys
+  private exportPacks (stream: Transform, packs: PackList): void {
 
     // Merge the files of the packs.
-    for (const packName of packNames) {
-      const pack = packs.get(packName)
-      const mainFile = this.files[packName].clone({contents: true, deep: true})
+    for (const pack of packs) {
+      const mainFile = this.createVinyl(pack.name)
 
-      // Note: The pack list includes the mainFile.
-      const files: Array<Vinyl|string> = pack.map(filename => this.files[filename])
+      const files: Array<Vinyl|string> = pack.files.map(filename => this.files[filename])
 
       // Add the prefix.
       files.unshift(packagePrefix)
@@ -191,5 +183,52 @@ export default class Project {
 
       stream.push(mainFile)
     }
+  }
+
+  /**
+   * Exports the locations of the files and their requirements into a "mappings.json" file in the base directory.
+   * @param stream - The output stream.
+   * @param locations - An object that contains the files with the names of their packs.
+   */
+  private async exportMappings (stream: Transform, locations: Locations): Promise<void> {
+    const { base } = this.files[this.names[0]]
+
+    const mappings = {}
+
+    for (const filename of this.names) {
+      const relatedFiles = new List<string>(filename)
+      const relatedPacks = new List<string>()
+
+      for (const current of relatedFiles) {
+        relatedPacks.add(locations[current])
+        relatedFiles.add(...this.requirements.get(current))
+      }
+
+      mappings[filename] = relatedPacks
+    }
+
+    console.log('mappings:', mappings)
+
+    const mappingsData = 'module.exports = ' + JSON.stringify(mappings, null, 2)
+    const outputFile = this.createVinyl('mappings.js', Buffer.from(mappingsData))
+
+    stream.push(outputFile)
+  }
+
+  /**
+   * Creates a new vinyl with a given name and contents.
+   * All other missing information will be filled from the first known file.
+   * @param name - The name of the file relative to the base directory.
+   * @param contents - The contents of the file (default: null).
+   */
+  private createVinyl (name: string, contents: Buffer = null): Vinyl {
+    const anyFile = this.files[this.names[0]]
+    return new Vinyl({
+      base: anyFile.base,
+      contents,
+      cwd: anyFile.cwd,
+      path: path.join(anyFile.base, name),
+      stat: anyFile.stat
+    })
   }
 }

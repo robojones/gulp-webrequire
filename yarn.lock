@@ -266,6 +266,10 @@ chalk@^2.1.0:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
+charcoder@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/charcoder/-/charcoder-1.1.9.tgz#5e0a9d918fc8b4663cea57c2f675c86f7a9ecd67"
+
 clone-buffer@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/clone-buffer/-/clone-buffer-1.0.0.tgz#e3e25b207ac4e701af721e2cb5a16792cac3dc58"
