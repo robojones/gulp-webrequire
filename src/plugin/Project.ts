@@ -191,11 +191,10 @@ export default class Project {
    * @param locations - An object that contains the files with the names of their packs.
    */
   private async exportMappings (stream: Transform, locations: Locations): Promise<void> {
-    const { base } = this.files[this.names[0]]
-
+    const entryPoints = this.names.filter(name => !this.requiredIn.get(name).length)
     const mappings = {}
 
-    for (const filename of this.names) {
+    for (const filename of entryPoints) {
       const relatedFiles = new List<string>(filename)
       const relatedPacks = new List<string>()
 
