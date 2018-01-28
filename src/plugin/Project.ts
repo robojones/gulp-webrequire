@@ -1,5 +1,5 @@
-const Charcoder = require('charcoder')
 import * as Concat from 'concat-with-sourcemaps'
+import * as crypto from 'crypto'
 import { fs } from 'mz'
 import * as path from 'path'
 import { Transform } from 'stream'
@@ -10,8 +10,6 @@ import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import Storage from '../lib/Storage'
 import getBrowserLib from './getBrowserLib'
 import Parser, {ParserOptions} from './Parser'
-
-const b62 = new Charcoder(Charcoder.B62)
 
 const prefixPath = require.resolve('../snippet/packagePrefix')
 /** A snippet of code that initializes the registerModule method
@@ -38,7 +36,6 @@ export interface ProjectOptions {
 }
 
 type PackList = Array<{
-  name: string,
   entryPoints: List<string>
   files: string[]
 }>
@@ -114,7 +111,6 @@ export default class Project {
 
   private async build (stream: Transform): Promise<void> {
     const packs: PackList = []
-    const locations: Locations = {}
 
     // Find initial entry points if none are passed.
     const entryPoints = new Storage<List<string>>(List)
@@ -145,31 +141,31 @@ export default class Project {
         // Create new pack.
         pack = {
           entryPoints: entry,
-          files: [],
-          name: b62.encode(packs.length) + '.js'
+          files: []
         }
         packs.push(pack)
       }
 
       // Add this file to pack.
       pack.files.push(filename)
-      locations[filename] = pack.name
     }
 
-    this.exportPacks(stream, packs)
+    const locations = this.exportPacks(stream, packs)
     await this.exportMappings(stream, locations)
   }
 
   /**
    * Merges the packages into single files and writes them to the output stream.
+   * It also generates and sets the names of the packages.
    * @param stream - The output stream.
    * @param packs - A storage containing the packs.
    */
-  private exportPacks (stream: Transform, packs: PackList): void {
+  private exportPacks (stream: Transform, packs: PackList): Locations {
+    const locations: Locations = {}
 
     // Merge the files of the packs.
     for (const pack of packs) {
-      const mainFile = this.createVinyl(pack.name)
+      const mainFile = this.createVinyl('')
 
       const files: Array<Vinyl|string> = pack.files.map(filename => this.files[filename])
 
@@ -181,8 +177,20 @@ export default class Project {
         typescript: true
       })
 
+      const hash = crypto.createHash('sha256')
+      hash.update(mainFile.contents as Buffer)
+      const packname = hash.digest().toString('base64', 0, 6).replace(/\+/g, '-').replace(/\//g, '_') + '.js'
+
+      mainFile.path = path.join(mainFile.base, packname)
+
+      for (const filename of pack.files) {
+        locations[filename] = packname
+      }
+
       stream.push(mainFile)
     }
+
+    return locations
   }
 
   /**
@@ -218,8 +226,9 @@ export default class Project {
    * @param name - The name of the file relative to the base directory.
    * @param contents - The contents of the file (default: null).
    */
-  private createVinyl (name: string, contents: Buffer = null): Vinyl {
+  private createVinyl (name?: string, contents: Buffer = null): Vinyl {
     const anyFile = this.files[this.names[0]]
+
     return new Vinyl({
       base: anyFile.base,
       contents,
