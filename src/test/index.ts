@@ -12,7 +12,7 @@ describe('gulp-webrequire', () => {
     this.timeout(30000)
 
     const tags = generateTags('build/test-resources', 'main.js', {
-      tagGenerator: (packagePath, contents) => {
+      tagGenerator: (packagePath) => {
         return packagePath + '\n'
       }
     })
