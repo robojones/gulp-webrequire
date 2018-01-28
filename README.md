@@ -116,3 +116,14 @@ In your EJS view:
   </body>
 </html>
 ```
+
+### Marko view engine
+```marko
+$ var webrequire = require('gulp-webrequire').generateTags;
+html
+  head
+    title -- Login
+    -- $!{webrequire('login.js')}
+  body
+    ...your website...
+```
