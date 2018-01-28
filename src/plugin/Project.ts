@@ -194,7 +194,8 @@ export default class Project {
   }
 
   /**
-   * Exports the locations of the files and their requirements into a "mappings.json" file in the base directory.
+   * Exports the locations of the files and their requirements into
+   * the "webrequire-mappings.js" file in the base directory.
    * @param stream - The output stream.
    * @param locations - An object that contains the files with the names of their packs.
    */
@@ -215,7 +216,7 @@ export default class Project {
     }
 
     const mappingsData = 'module.exports = ' + JSON.stringify(mappings, null, 2)
-    const outputFile = this.createVinyl('mappings.js', Buffer.from(mappingsData))
+    const outputFile = this.createVinyl('webrequire-mappings.js', Buffer.from(mappingsData))
 
     stream.push(outputFile)
   }

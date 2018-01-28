@@ -44,7 +44,7 @@ export default function generateTags (
     cacheTags?: boolean
   } = {}
 ): string {
-  const mappings = require(path.resolve(base, 'mappings.js'))
+  const mappings = require(path.resolve(base, 'webrequire-mappings.js'))
   const files = (Array.isArray(entryPoint)) ? entryPoint : [entryPoint]
   const packs = new List<string>()
 
