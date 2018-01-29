@@ -165,9 +165,12 @@ export default class Project {
 
     // Merge the files of the packs.
     for (const pack of packs) {
-      const mainFile = this.createVinyl('')
+      const mainFile = this.createVinyl('pack.js')
 
       const files: Array<Vinyl|string> = pack.files.map(filename => this.files[filename])
+
+      // Activate sourcemaps.
+      mainFile.sourceMap = (files[0] as Vinyl).sourceMap
 
       // Add the prefix.
       files.unshift(packagePrefix)
