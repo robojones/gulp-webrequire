@@ -68,7 +68,7 @@ export default function generateTags (
   const mappingFilename = path.resolve(mergedOptions.base, 'webrequire-mappings.js')
 
   // Remove old mappings.
-  if (mergedOptions.cache) {
+  if (!mergedOptions.cache) {
     delete require.cache[mappingFilename]
   }
 
