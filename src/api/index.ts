@@ -25,32 +25,47 @@ export type TagGenerator = (packagePath: string) => string
 
 export interface Options {
   /**
-   * A custom function that gets the path to the file and its contents passed.
-   * It returns a string containing the html script-tag for the given file.
+   * The directory where your public javascript files are located.
+   * @example
+   * { base: 'public/js' }
    */
-  tagGenerator?: TagGenerator
+  base?: string
   /**
    * Gulp-webrequire will cache which files are in which packs.
    * To disable this behaviour you can set this option to false.
    * (default: true)
+   * @example
+   * { cache: process.env.NODE_ENV !== 'development' }
    */
   cache?: boolean
+  /**
+   * A custom function that gets the path to the file and its contents passed.
+   * It returns a string containing the html script-tag for the given file.
+   * @example
+   * { tagGenerator: (path) => `<script src="https://example.com/${path}" async></script>` }
+   */
+  tagGenerator?: TagGenerator
 }
 
 /**
  * Generate script tags for all packs that are related to your entry point(s).
- * @param base - The directory that contains your public javascript files.
  * @param entryPoints - Entry points to your code relative to the base directory. (The file extension should be set.)
  * @param options - A function that generates script tags.
  */
 export default function generateTags (
-  base: string,
   entryPoint: string | string[],
   options: Options = {}
 ): string {
   const mergedOptions = Object.assign({}, globalOptions, options)
 
-  const mappingFilename = path.resolve(base, 'webrequire-mappings.js')
+  if (typeof mergedOptions.base === 'undefined') {
+    throw new TypeError('gulp-webrequire: '
+    + 'base not set!'
+    + 'You need to set a base directory where your javascript files are located (e.g. "public/js").'
+    + 'Your can specify it using the setup() method or directly in the generateTags method.')
+  }
+
+  const mappingFilename = path.resolve(mergedOptions.base, 'webrequire-mappings.js')
 
   // Remove old mappings.
   if (mergedOptions.cache) {
@@ -89,6 +104,11 @@ export default function generateTags (
 /**
  * Set options for the generateTags() method.
  * The options will be overloaded by the ones that you set in the generateTags() method.
+ * @example
+ * setup({
+ *   base: 'public/js',
+ *   cache: process.env.NODE_ENV !== 'development'
+ * })
  */
 export function setup (options: Options): void {
   Object.assign(globalOptions, options)
