@@ -21,7 +21,7 @@ __Smart packing?__
 It is really nice, trust me! I am planning to write a small wiki page about it.
 
 The most important facts are:
-- Every module that is not required by any other module is considered an entry point. You can generate script tags by for entry points with the (#how-to-find-out-what-scripts-tags-need-to-be-added).
+- Every module that is not required by any other module is considered an entry point. You can generate script tags by for entry points with the [api](#how-to-find-out-what-scripts-tags-need-to-be-added).
 - No module will be included multiple packs. --> All files can be cached by the browser and no module will be loaded twice.
 
 __So why should I use this?__
@@ -62,9 +62,10 @@ gulp.task('default', ['javascript'])
 
 Gulp-webrequire comes with an extremely nice api that you can use in your code (e.g. directly in your view engine).
 ```javascript
-const { generateTags } = require('gulp-webrequire')
+const { generateTags, setup } = require('gulp-webrequire')
 
-generateTags('public/js', ['login.js', 'menu.js'])
+setup({ base: 'public/js' })
+generateTags(['login.js', 'menu.js'])
 ```
 
 The generateTags method will find all js files that are being imported in the `login.js` and `menu.js` file.
@@ -73,15 +74,35 @@ Your can use the returned string to render it into your website's HTML.
 
 ## generateTags method
 
-```
-generateTags (base, entryPoint, options)
+```javascript
+const { generateTags } = require('gulp-webrequire')
 ```
 
-- base `<string>` - The directory that contains your public javascript files.
+This method allows you to generate scripttags for all files that are related to an entry point.
+
+```
+generateTags (entryPoint, options)
+```
+
 - entryPoints `<string|string[]>` - Entry points to your code relative to the base directory. (The file extension should be set.)
 - options
+  - base `<string>` - The directory that contains your public javascript files.
   - tagGenerator `<function>` - A function that receives a path and generates a script-tag for it. The path is relative to the base directory and does not begin with a `/`.
-  - cacheTags `<boolean>` - By default the tagGenerator will never be called twice with the same path. The returned string will be cached. You can disable this behaviour by setting this option to `false`. (default: `true`)
+  - cache `<boolean>` - Gulp-webrequire will cache which files are in which packs. To disable this behaviour you can set this option to false. (default: `true`)
+
+## setup method
+
+```javascript
+const { setup } = require('gulp-webrequire')
+```
+
+With this method you can change the default options for the generateTags method.
+
+```
+setup (options)
+```
+
+- options - The same ones that your can set in the [generateTags](#generatetags-method) method.
 
 ## Examples
 
@@ -91,10 +112,17 @@ Your nodejs app:
 
 ```javascript
 const app = require(express)()
-const webrequire = require('gulp-webrequire').generateTags
+const {
+  generateTags,
+  setup
+} = require('gulp-webrequire')
+
+setup({
+  base: 'public/js'
+})
 
 app.get('/login', function(req, res){ 
-  const tags = webrequire('login.js')
+  const tags = generateTags('login.js')
   res.render('index', {
     scriptTags: tags
   })
@@ -123,7 +151,7 @@ $ var webrequire = require('gulp-webrequire').generateTags;
 html
   head
     title -- Login
-    -- $!{webrequire('login.js')}
+    -- $!{webrequire('login.js', { base: 'public/js' })}
   body
     ...your website...
 ```
