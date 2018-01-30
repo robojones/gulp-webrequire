@@ -114,7 +114,7 @@ class Parser extends EventEmitter {
     const requirementString = JSON.stringify(requirements.map(fileHandle => fileHandle.final))
     const n = JSON.stringify(name)
     const prefix = `window.registerModule([${requirementString}, ${n}, function (module, exports, require) {\n`
-    const postfix = '}]);'
+    const postfix = '}]);\n'
 
     mergeWithSourcemaps(file, [prefix, file, postfix])
   }
