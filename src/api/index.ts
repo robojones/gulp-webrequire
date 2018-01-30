@@ -2,11 +2,18 @@ import * as path from 'path'
 import List from '../lib/List'
 
 /**
- * Contains all related packs of a pack.
+ * A list containing the paths to all mapping files that have been imported.
  */
-const tagCache: {
-  [packname: string]: string
-} = {}
+const mappingFiles = new List<string>()
+
+export const defaultTagGenerator: TagGenerator = (packagePath: string): string => {
+  return `<script src="${packagePath}" async></script>`
+}
+
+const globalOptions: Options = {
+  cache: true,
+  tagGenerator: defaultTagGenerator
+}
 
 /**
  * A function that gets called for each pack and generates a script tag for the pack.
@@ -16,8 +23,18 @@ const tagCache: {
  */
 export type TagGenerator = (packagePath: string) => string
 
-export const defaultTagGenerator: TagGenerator = (packagePath: string): string => {
-  return `<script src="${packagePath}" async></script>`
+export interface Options {
+  /**
+   * A custom function that gets the path to the file and its contents passed.
+   * It returns a string containing the html script-tag for the given file.
+   */
+  tagGenerator?: TagGenerator
+  /**
+   * Gulp-webrequire will cache which files are in which packs.
+   * To disable this behaviour you can set this option to false.
+   * (default: true)
+   */
+  cache?: boolean
 }
 
 /**
@@ -29,22 +46,21 @@ export const defaultTagGenerator: TagGenerator = (packagePath: string): string =
 export default function generateTags (
   base: string,
   entryPoint: string | string[],
-  options: {
-    /**
-     * A custom function that gets the path to the file and its contents passed.
-     * It returns a string containing the html script-tag for the given file.
-     */
-    tagGenerator?: TagGenerator,
-    /**
-     * Gulp-webrequire will cache the results of the tagGenerator.
-     * The tagGenerator will never be called with the same path twice.
-     * This option lets you disable the cache by setting it to false.
-     * (default: true)
-     */
-    cacheTags?: boolean
-  } = {}
+  options: Options = {}
 ): string {
-  const mappings = require(path.resolve(base, 'webrequire-mappings.js'))
+  const mergedOptions = Object.assign({}, globalOptions, options)
+
+  const mappingFilename = path.resolve(base, 'webrequire-mappings.js')
+
+  // Remove old mappings.
+  if (mergedOptions.cache) {
+    delete require.cache[mappingFilename]
+  }
+
+  // Import mappings.
+  const mappings = require(mappingFilename)
+  mappingFiles.push(mappingFilename)
+
   const files = (Array.isArray(entryPoint)) ? entryPoint : [entryPoint]
   const packs = new List<string>()
 
@@ -54,22 +70,26 @@ export default function generateTags (
 
   let html = ''
 
-  const tagGenerator: TagGenerator = options.tagGenerator || defaultTagGenerator
+  const tagGenerator: TagGenerator = mergedOptions.tagGenerator
 
   for (const pack of packs) {
-    if (!tagCache[pack] || options.cacheTags === false) {
-      // set/overwrite tagCache
-      const tag = tagGenerator(pack)
+    // set/overwrite tagCache
+    const tag = tagGenerator(pack)
 
-      if (typeof tag !== 'string') {
-        throw new Error('options.tagGenerator must return a string. Instead got: ' + typeof tag)
-      }
-
-      tagCache[pack] = tag
+    if (typeof tag !== 'string') {
+      throw new Error('options.tagGenerator must return a string. Instead got: ' + typeof tag)
     }
 
-    html += tagCache[pack]
+    html += tag
   }
 
   return html
+}
+
+/**
+ * Set options for the generateTags() method.
+ * The options will be overloaded by the ones that you set in the generateTags() method.
+ */
+export function setup (options: Options): void {
+  Object.assign(globalOptions, options)
 }
