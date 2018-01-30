@@ -19,6 +19,12 @@ const TS_SETTINGS = {
   pretty: true
 }
 
+const TS_BROWSER_SETTINGS = Object.assign({}, TS_SETTINGS, {
+  declaration: false,
+  target: 'es5',
+  lib: ['es5', 'dom']
+})
+
 const serverTS = ts.createProject(TS_SETTINGS)
 gulp.task('server', function () {
 
@@ -33,11 +39,7 @@ gulp.task('server', function () {
 })
 
 
-const snippetTS = ts.createProject(Object.assign({}, TS_SETTINGS, {
-  declaration: false,
-  target: 'es5',
-  lib: ['es5', 'dom']
-}))
+const snippetTS = ts.createProject(TS_BROWSER_SETTINGS)
 
 gulp.task('snippet', function () {
 
@@ -49,7 +51,7 @@ gulp.task('snippet', function () {
   ])
 })
 
-const resourcesTS = ts.createProject(TS_SETTINGS)
+const resourcesTS = ts.createProject(TS_BROWSER_SETTINGS)
 
 gulp.task('test-resources', function () {
 
