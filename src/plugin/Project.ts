@@ -25,6 +25,13 @@ export interface ProjectOptions {
    * { modulesDir: 'lib' }
    */
   modulesDir?: string
+
+  /**
+   * Specify some additional entry-points.
+   * In some cases you might want to have a file as entry point that is being required in other files.
+   * You can do this with this option.
+   */
+  entryPoints?: string[]
 }
 
 type PackList = Array<{
@@ -38,7 +45,10 @@ interface Locations {
 }
 
 export default class Project {
-  private options: ProjectOptions
+  private options: ProjectOptions = {
+    entryPoints: [],
+    modulesDir: 'module'
+  }
   private parser: Parser
 
   private files: {[name: string]: Vinyl} = {}
@@ -47,13 +57,9 @@ export default class Project {
   private requiredIn = new Storage<List<string>>(List)
 
   constructor (options: ProjectOptions) {
+    Object.assign(this.options, options)
 
-    if (!options.modulesDir) {
-      options.modulesDir = 'module'
-    }
-
-    this.options = options
-    this.parser = new Parser(options as ParserOptions)
+    this.parser = new Parser(this.options as ParserOptions)
 
     this.parser.on('file', (file, requirements) => {
       const current = file.relative
@@ -106,11 +112,18 @@ export default class Project {
     return stream
   }
 
+  private get entryPoints (): List<string> {
+    const result = new List<string>()
+    result.add(...this.names.filter(name => !this.requiredIn.get(name).length))
+    result.add(...this.options.entryPoints)
+    return result
+  }
+
   private build (stream: Transform): void {
     const packs: PackList = []
 
-    // Find initial entry points if none are passed.
-    const entryPoints = new Storage<List<string>>(List)
+    const entryPoints = this.entryPoints
+    const fileEntryPoints = new Storage<List<string>>(List)
 
     // Find entryPoints for each file.
     for (const filename of this.names) {
@@ -119,15 +132,17 @@ export default class Project {
         const requiredIn = this.requiredIn.get(current)
         if (requiredIn.length) {
           queue.add(...requiredIn)
-        } else {
-          entryPoints.get(filename).add(current)
+        }
+
+        if (entryPoints.includes(current)) {
+          fileEntryPoints.get(filename).add(current)
         }
       }
     }
 
     // Group by same entry points.
     for (const filename of this.names) {
-      const entry = entryPoints.get(filename)
+      const entry = fileEntryPoints.get(filename)
 
       // Find pack if it already exists.
       let pack = packs.find(p => {
@@ -200,8 +215,8 @@ export default class Project {
    * @param locations - An object that contains the files with the names of their packs.
    */
   private exportMappings (stream: Transform, locations: Locations): void {
-    const entryPoints = this.names.filter(name => !this.requiredIn.get(name).length)
-    const mappings = {}
+    const entryPoints = this.entryPoints
+    const mappings: {[filename: string]: string[]} = {}
 
     for (const filename of entryPoints) {
       const relatedFiles = new List<string>(filename)
