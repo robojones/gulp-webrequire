@@ -103,13 +103,18 @@ export default class Project {
     const stream = through.obj((file: Vinyl, enc, cb) => {
       this.parser.parse(file).then(cb).catch(err => stream.emit('error', err))
     }, (cb) => {
-      this.build(stream).then(cb).catch(err => stream.emit('error', err))
+      try {
+        this.build(stream)
+        cb()
+      } catch (error) {
+        stream.emit('error', error)
+      }
     })
 
     return stream
   }
 
-  private async build (stream: Transform): Promise<void> {
+  private build (stream: Transform): void {
     const packs: PackList = []
 
     // Find initial entry points if none are passed.
@@ -151,7 +156,7 @@ export default class Project {
     }
 
     const locations = this.exportPacks(stream, packs)
-    await this.exportMappings(stream, locations)
+    this.exportMappings(stream, locations)
   }
 
   /**
@@ -202,7 +207,7 @@ export default class Project {
    * @param stream - The output stream.
    * @param locations - An object that contains the files with the names of their packs.
    */
-  private async exportMappings (stream: Transform, locations: Locations): Promise<void> {
+  private exportMappings (stream: Transform, locations: Locations): void {
     const entryPoints = this.names.filter(name => !this.requiredIn.get(name).length)
     const mappings = {}
 
