@@ -6,3 +6,5 @@ export {
   webrequire,
   generateTags
 }
+
+export default webrequire
