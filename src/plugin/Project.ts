@@ -12,21 +12,13 @@ import getBrowserLib from './getBrowserLib'
 import Parser, {ParserOptions} from './Parser'
 
 const prefixPath = require.resolve('../snippet/packagePrefix')
-/** A snippet of code that initializes the registerModule method
+/**
+ * A snippet of code that initializes the registerModule method
  * in the beginning of the package, if it does not exist yet.
  */
 const packagePrefix = fs.readFileSync(prefixPath).toString()
 
 export interface ProjectOptions {
-  /**
-   * If set to false no packages will be generated.
-   * All input files will stay separate files.
-   * (default: true)
-   * @example
-   * { smartPacking: false }
-   */
-  smartPacking?: boolean
-
   /**
    * The directory that external modules get imported to. (default: 'module')
    * @example
