@@ -38,17 +38,16 @@ class Parser extends EventEmitter {
    */
   public async parse (origin: Vinyl): Promise<void> {
 
+    // Remove trailing slashes.
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
     const requirements = findRequirements(origin, this.options.modulesDir)
 
     const promises = requirements.map(fileHandle => {
-      if (!fileHandle.isModule) {
-        return
+      if (fileHandle.isModule) {
+        return this.import(fileHandle)
       }
-
-      return this.import(fileHandle)
-    }).filter(e => e) as Array<Promise<void>>
+    })
 
     const files = await Promise.all(promises)
 
@@ -93,13 +92,13 @@ class Parser extends EventEmitter {
 
     file.sourceMap = initSourcemap(file.relative, contents)
 
-    if (findRequirements(file, this.options.modulesDir).length) {
-      throw new Error(
-        `External modules are not allowed to require other modules! (${originalPath})`
-      )
-    }
+    const requirements = findRequirements(file, this.options.modulesDir)
 
-    this.wrap([], file)
+    // Import all requirements.
+    const promises = requirements.map(requirement => this.import(requirement))
+    await Promise.all(promises)
+
+    this.wrap(requirements, file)
 
     this.emit('file', file, [])
   }

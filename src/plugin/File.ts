@@ -1,6 +1,8 @@
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
 
+const MODULES = 'node_modules'
+
 export default class File {
 
   /** The working directory of the origin file. */
@@ -54,15 +56,23 @@ export default class File {
     return first !== '.' && first !== '..'
   }
 
-  /** The absolute final path. */
+  /**
+   * The absolute final path.
+   */
   get finalPath () {
     return path.join(this.base, this.finalName)
   }
 
-  /** The final path relative to the output directory. */
+  /**
+   * The final path relative to the output directory.
+   * @example
+   * "modules/jquery/dist/jquery.js"
+   */
   get finalName () {
     if (this.isModule) {
-      return path.join(this.modulesDir, this.mention + '.js')
+      const fullPath = this.resolved
+      const baseIndex = fullPath.indexOf(MODULES) + MODULES.length
+      return path.join(this.modulesDir, fullPath.substr(baseIndex))
     }
 
     const resolved = this.resolved
