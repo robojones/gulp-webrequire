@@ -80,6 +80,11 @@ export default function generateTags (
   const packs = new List<string>()
 
   for (const file of files) {
+    if (!mappings[file]) {
+      throw new Error(`File "${file}" is not an entry point.`
+       + 'If it should be an entry point you can add it to the entryPoints option of gulp-webrequire.')
+    }
+
     packs.add(...mappings[file])
   }
 
