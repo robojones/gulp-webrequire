@@ -82,11 +82,11 @@ type RegisterModuleArguments = [Requirements, Name, Code]
 
         return cache[realname]
       }
-    }
+    };
 
     // Register modules that have been loaded before webrequire.
-    window.moduleQueue.forEach(e => {
-      window.registerModule(e)
+    (window as any).moduleQueue.forEach(e => {
+      (window as any).registerModule(e)
     })
   }
 })()
