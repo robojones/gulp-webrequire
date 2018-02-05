@@ -36,6 +36,8 @@ __How is this better than adding script-tags the old-fashioned way?__
 This will allow your script files to be loaded parallely.
 You don't need to worry about the order in which your scripts are executed - If one of your scripts requires another one,
 `gulp-webrequire` will make sure that the required file is executed first.
+It is also guaranteed that your scripts will be __executed after the "DOMContentLoaded" event__ was emitted.
+
 
 ## Setup with gulp
 
