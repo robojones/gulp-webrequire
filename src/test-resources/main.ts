@@ -1,5 +1,5 @@
 // import A from './another-file'
-import * as $ from './test-dir/file'
+import * as $ from './test-dir'
 
 export function test (condition: any, msg: string): void {
   if (!condition) {
