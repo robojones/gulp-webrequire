@@ -30,6 +30,8 @@ export default class File {
       throw new Error(`Absolute paths are forbidden! (${origin.path})`)
     }
 
+    console.log('mention:', mention)
+
     this.modulesDir = modulesDir
     this.cwd = origin.cwd
     this.base = origin.base

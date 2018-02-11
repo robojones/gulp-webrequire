@@ -3,6 +3,7 @@ import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
 import initSourcemap from '../lib/initSourcemap'
+import List from '../lib/List'
 import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import SourceMap from '../lib/SourceMap'
 import File from './File'
@@ -12,13 +13,26 @@ export type LinkerOptions = ParserOptions
 
 declare interface Linker {
   on (event: 'file', listener: (file: Vinyl, requirements: string[]) => void): this
+  on (event: 'build', listener: () => void): this
   emit (event: 'file', file: Vinyl, requirements: string[]): boolean
+  emit (event: 'build'): boolean
 }
 
 class Linker extends EventEmitter {
-  private history: string[] = []
   private options: LinkerOptions
   private parser: Parser
+  private buildListeners: {
+    [resolvedPath: string]: () => void
+  } = {}
+
+  /** Contains the paths to all modules that have been imported. */
+  private history: string[] = []
+
+  /** The number of files that have been imported but are not emitted yet. */
+  private queueLength = 0
+
+  /** Contains all paths to all files. */
+  private paths = new List<string>()
 
   public constructor (options: LinkerOptions) {
     super()
@@ -33,6 +47,7 @@ class Linker extends EventEmitter {
    * @param origin - The file to parse.
    */
   public async update (origin: Vinyl): Promise<void> {
+    this.queueLength += 1
 
     // Remove trailing slashes.
     origin.base = path.join('/', ...origin.base.split(path.sep))
@@ -49,9 +64,75 @@ class Linker extends EventEmitter {
 
     this.wrap(requirements, origin)
 
-    const requirementStrings = requirements.map(file => file.finalName)
+    this.paths.add(origin.path)
 
-    this.emit('file', origin, requirementStrings)
+    const removedOld = this.listenForBuild(origin, () => {
+      this.verifyRequirements(requirements)
+      const requirementStrings = requirements.map(file => file.finalName)
+
+      this.queueLength -= 1
+      this.emit('file', origin, requirementStrings)
+    })
+
+    if (removedOld) {
+      this.queueLength -= 1
+    }
+  }
+
+  public async build (): Promise<void> {
+    this.emit('build')
+
+    if (this.queueLength) {
+      await new Promise((resolve) => {
+        this.on('file', function listener () {
+          if (!this.queueLength) {
+            this.off('file', listener)
+            resolve()
+          }
+        })
+      })
+    }
+  }
+
+  /**
+   * Adds a listener for the "build" event. Removes the old listener if one exists for the same origin.
+   * Returns true if an old listener was removed.
+   * @param origin - The file that will be emitted by the listener.
+   * @param listener - A function that will be executed when the build event is emitted.
+   */
+  private listenForBuild (origin: Vinyl, listener: () => void): boolean {
+    let removed = false
+
+    // Remove old listeners for same file.
+    const oldListener = this.buildListeners[origin.path]
+    if (oldListener) {
+      this.removeListener('build', oldListener)
+      removed = true
+    }
+
+    // Apply new listener.
+    this.buildListeners[origin.path] = listener
+    this.once('build', listener)
+
+    return removed
+  }
+
+  private verifyRequirements (files: File[]) {
+    console.log(this.paths)
+    for (const file of files) {
+      if (this.paths.includes(file.finalPath)) {
+        continue
+      }
+
+      file.isDir = true
+      if (this.paths.includes(file.finalPath)) {
+        console.log(`file "${file.finalName}" is a directory.`)
+        continue
+      }
+      file.isDir = false
+
+      throw new Error(`File "${file.resolved}" not found. Please make sure that you pass all files to the project.`)
+    }
   }
 
   /**
@@ -88,15 +169,17 @@ class Linker extends EventEmitter {
 
     file.sourceMap = initSourcemap(file.relative, contents)
 
-    const requirements = this.parser.parse(file)
+    this.update(file)
 
-    // Import all requirements.
-    const promises = requirements.map(requirement => this.import(requirement))
-    await Promise.all(promises)
+    // const requirements = this.parser.parse(file)
 
-    this.wrap(requirements, file)
+    // // Import all requirements.
+    // const promises = requirements.map(requirement => this.import(requirement))
+    // await Promise.all(promises)
 
-    this.emit('file', file, [])
+    // this.wrap(requirements, file)
+
+    // this.emit('file', file, [])
   }
 
   /**

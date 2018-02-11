@@ -101,12 +101,7 @@ export default class Project {
     const stream = through.obj((file: Vinyl, enc, cb) => {
       this.linker.update(file).then(cb).catch(err => stream.emit('error', err))
     }, (cb) => {
-      try {
-        this.build(stream)
-        cb()
-      } catch (error) {
-        stream.emit('error', error)
-      }
+      this.build(stream).then(cb).catch(err => stream.emit('error', err))
     })
 
     return stream
@@ -119,7 +114,9 @@ export default class Project {
     return result
   }
 
-  private build (stream: Transform): void {
+  private async build (stream: Transform): Promise<void> {
+    await this.linker.build()
+
     const packs: PackList = []
 
     const entryPoints = this.entryPoints
