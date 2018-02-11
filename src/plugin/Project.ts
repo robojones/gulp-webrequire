@@ -49,7 +49,7 @@ export default class Project {
     entryPoints: [],
     modulesDir: 'module'
   }
-  private parser: Parser
+  private linker: Linker
 
   private files: {[name: string]: Vinyl} = {}
   private names = new List<string>()
@@ -59,9 +59,9 @@ export default class Project {
   constructor (options: ProjectOptions) {
     Object.assign(this.options, options)
 
-    this.parser = new Parser(this.options as ParserOptions)
+    this.linker = new Linker(this.options as LinkerOptions)
 
-    this.parser.on('file', (file, requirements) => {
+    this.linker.on('file', (file, requirements) => {
       const current = file.relative
       const snippetName = path.join(this.options.modulesDir, 'webrequire.js')
 
@@ -99,7 +99,7 @@ export default class Project {
    */
   public through (): Transform {
     const stream = through.obj((file: Vinyl, enc, cb) => {
-      this.parser.parse(file).then(cb).catch(err => stream.emit('error', err))
+      this.linker.update(file).then(cb).catch(err => stream.emit('error', err))
     }, (cb) => {
       try {
         this.build(stream)

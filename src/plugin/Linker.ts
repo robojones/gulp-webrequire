@@ -6,15 +6,9 @@ import initSourcemap from '../lib/initSourcemap'
 import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import SourceMap from '../lib/SourceMap'
 import File from './File'
-import findRequirements from './findRequirements'
+import Parser, { ParserOptions } from './Parser'
 
-export interface LinkerOptions {
-  /**
-   * The directory that external modules get imported to.
-   */
-  modulesDir: string
-  [option: string]: any
-}
+export type LinkerOptions = ParserOptions
 
 declare interface Linker {
   on (event: 'file', listener: (file: Vinyl, requirements: string[]) => void): this
@@ -24,10 +18,12 @@ declare interface Linker {
 class Linker extends EventEmitter {
   private history: string[] = []
   private options: LinkerOptions
+  private parser: Parser
 
   public constructor (options: LinkerOptions) {
     super()
     this.options = options
+    this.parser = new Parser(options)
   }
 
   /**
@@ -36,12 +32,12 @@ class Linker extends EventEmitter {
    * All importet files will also be emitted in the "file" event.
    * @param origin - The file to parse.
    */
-  public async parse (origin: Vinyl): Promise<void> {
+  public async update (origin: Vinyl): Promise<void> {
 
     // Remove trailing slashes.
     origin.base = path.join('/', ...origin.base.split(path.sep))
 
-    const requirements = findRequirements(origin, this.options.modulesDir)
+    const requirements = this.parser.parse(origin)
 
     const promises = requirements.map(fileHandle => {
       if (fileHandle.isModule) {
@@ -92,7 +88,7 @@ class Linker extends EventEmitter {
 
     file.sourceMap = initSourcemap(file.relative, contents)
 
-    const requirements = findRequirements(file, this.options.modulesDir)
+    const requirements = this.parser.parse(file)
 
     // Import all requirements.
     const promises = requirements.map(requirement => this.import(requirement))
@@ -119,4 +115,4 @@ class Linker extends EventEmitter {
   }
 }
 
-export default Parser
+export default Linker
