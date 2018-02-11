@@ -9,7 +9,7 @@ import List from '../lib/List'
 import mergeWithSourcemaps from '../lib/mergeWithSourcemaps'
 import Storage from '../lib/Storage'
 import getBrowserLib from './getBrowserLib'
-import Parser, {ParserOptions} from './Parser'
+import Linker, { LinkerOptions } from './Linker'
 
 const prefixPath = require.resolve('../snippet/packagePrefix')
 /**
