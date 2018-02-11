@@ -4,7 +4,6 @@ import * as Vinyl from 'vinyl'
 const MODULES = 'node_modules'
 
 export default class File {
-
   /** The working directory of the origin file. */
   public cwd: string
 
@@ -23,6 +22,9 @@ export default class File {
   /** The directory that contains imported modules. */
   private modulesDir: string
 
+  /** If set to true /index.js will be appended to the resolved filename. */
+  private isDirectory: boolean = false
+
   constructor (origin: Vinyl, mention: string, modulesDir?: string) {
     if (path.isAbsolute(mention)) {
       throw new Error(`Absolute paths are forbidden! (${origin.path})`)
@@ -36,18 +38,36 @@ export default class File {
     this.originPath = origin.path
   }
 
+  /** If set to true /index.js will be appended to the resolved filename. */
+  set isDir (value: boolean) {
+    if (this.ext) {
+      throw new Error(`The file "${this.resolved}" has a file extension. It cannot be a directory.`)
+    }
+
+    this.isDirectory = value
+  }
+
+  get isDir () {
+    return this.isDirectory
+  }
+
   /** The absolute path to the file. */
   get resolved () {
     if (this.isModule) {
       return require.resolve(this.mention)
     }
 
-    const { ext } = path.parse(this.mention)
-    if (!ext) {
-      this.mention += '.js'
+    let name = this.mention
+
+    if (this.isDirectory) {
+      name = path.join(name, 'index')
     }
 
-    return path.join(this.origin, this.mention)
+    if (!this.ext) {
+      name += '.js'
+    }
+
+    return path.join(this.origin, name)
   }
 
   /** Is true if the mention does not start with "./" or "../" */
@@ -85,8 +105,14 @@ export default class File {
     return resolved.substr(this.base.length + 1)
   }
 
-  /** An array containing the mention [0] and the path [1] to the file relative to the cwd */
+  /** An array containing the mention [0] and the path [1] to the file relative to the cwd. */
   get final (): [string, string] {
     return [this.mention, this.finalName]
+  }
+
+  /** Returns the file extension. */
+  get ext (): string {
+    const { ext } = path.parse(this.mention)
+    return ext
   }
 }
