@@ -111,14 +111,17 @@ class Linker extends EventEmitter {
     }
 
     // Apply new listener.
-    this.buildListeners[origin.path] = listener
-    this.once('build', listener)
+    const newListener = () => {
+      delete this.buildListeners[origin.path]
+      listener()
+    }
+    this.buildListeners[origin.path] = newListener
+    this.once('build', newListener)
 
     return removed
   }
 
   private verifyRequirements (files: File[]) {
-    console.log(this.paths)
     for (const file of files) {
       if (this.paths.includes(file.finalPath)) {
         continue
@@ -126,7 +129,6 @@ class Linker extends EventEmitter {
 
       file.isDir = true
       if (this.paths.includes(file.finalPath)) {
-        console.log(`file "${file.finalName}" is a directory.`)
         continue
       }
       file.isDir = false
