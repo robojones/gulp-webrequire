@@ -54,9 +54,14 @@ class Linker extends EventEmitter {
 
     const requirements = this.parser.parse(origin)
 
+    log('Linker: Imports for', origin.path)
+
     const promises = requirements.map(fileHandle => {
       if (fileHandle.isModule) {
+        log('  Linker: Importing external module', fileHandle.mention)
         return this.import(fileHandle)
+      } else {
+        log('  Linker: File is not external:', fileHandle.mention)
       }
     })
 
@@ -133,6 +138,7 @@ class Linker extends EventEmitter {
       }
       file.isDir = false
 
+
       throw new Error(`File "${file.resolved}" not found. Please make sure that you pass all files to the project.`)
     }
   }
@@ -171,7 +177,9 @@ class Linker extends EventEmitter {
 
     file.sourceMap = initSourcemap(file.relative, contents)
 
-    this.update(file)
+    log('Linker: Imported:', fileHandle.mention)
+
+    await this.update(file)
 
     // const requirements = this.parser.parse(file)
 

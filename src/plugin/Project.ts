@@ -99,6 +99,7 @@ export default class Project {
    */
   public through (): Transform {
     const stream = through.obj((file: Vinyl, enc, cb) => {
+      log('Project: update file:', file.path)
       this.linker.update(file).then(cb).catch(err => stream.emit('error', err))
     }, (cb) => {
       this.build(stream).then(cb).catch(err => stream.emit('error', err))
