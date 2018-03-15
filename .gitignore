@@ -1,7 +1,17 @@
+# Typescript
 build/
+
+# NPM
 node_modules/
+package-lock.json
+
+# misc
 assets/
 coverage/
 config.json
+
+# logs
 *.log
+
+# test
 test.html
