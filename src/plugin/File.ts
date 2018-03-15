@@ -1,5 +1,8 @@
+import * as browserResolve from 'browser-resolve'
 import * as path from 'path'
 import * as Vinyl from 'vinyl'
+
+const resolve = browserResolve.sync
 
 const MODULES = 'node_modules'
 
@@ -54,7 +57,7 @@ export default class File {
   /** The absolute path to the file. */
   get resolved () {
     if (this.isModule) {
-      return require.resolve(this.mention)
+      return resolve(this.mention)
     }
 
     let name = this.mention

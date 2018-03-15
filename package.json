@@ -47,10 +47,12 @@
     "typescript": "^2.6.2"
   },
   "dependencies": {
+    "@types/browser-resolve": "^0.0.5",
     "@types/esprima": "^4.0.1",
     "@types/mz": "^0.0.32",
     "@types/through2": "^2.0.33",
     "@types/vinyl": "^2.0.2",
+    "browser-resolve": "^1.11.2",
     "concat-with-sourcemaps": "^1.0.5",
     "esprima": "^4.0.0",
     "mz": "^2.7.0",
