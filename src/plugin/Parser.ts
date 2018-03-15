@@ -29,28 +29,21 @@ export default class Parser {
     const tokens = tokenize(origin.contents.toString())
     const result: File[] = []
 
-    let step = 0
-    let name: string
 
-    for (const { type, value } of tokens) {
-      if (type === 'Keyword' && value === 'import') {
+    for (let i = 0; (i + 4) <= tokens.length; i++) {
+      if (tokens[i].type === 'Keyword' && tokens[i].value === 'import') {
         throw new Error(`The import syntax is not supported! (${origin.path})`)
-      } else if (step === 0 && type === 'Identifier' && value === 'require') {
-        step += 1
-      } else if (step === 1 && type === 'Punctuator' && value === '(') {
-        step += 1
-      } else if (step === 2 && type === 'String') {
-        step += 1
-        // Temporarily store the filename.
-        name = value.substring(1, value.length - 1)
-      } else if (step === 3 && type === 'Punctuator' && value === ')') {
-        // The require statement is complete. Reset the step.
-        step = 0
-        // The require statement is valid. Store the result.
-        const fileHandle = new File(origin, name, this.options.modulesDir)
-        result.push(fileHandle)
-      } else {
-        step = 0
+      }
+
+      if (
+        tokens[i].type === 'Identifier' && tokens[i].value === 'require' &&
+        tokens[i + 1].type === 'Punctuator' && tokens[i + 1].value === '(' &&
+        tokens[i + 2].type === 'String' &&
+        tokens[i + 3].type === 'Punctuator' && tokens[i + 3].value === ')'
+      ) {
+        const match = tokens[i + 2].value
+        const name = match.substring(1, match.length - 1)
+        result.push(new File(origin, name, this.options.modulesDir))
       }
     }
     return result
