@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import '../lib/logs'
 import Project, { ProjectOptions } from './Project'
 
 /**
