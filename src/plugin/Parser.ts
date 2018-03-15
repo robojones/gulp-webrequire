@@ -28,21 +28,29 @@ export default class Parser {
   public parse (origin: Vinyl): File[] {
     const tokens = tokenize(origin.contents.toString())
     const result: File[] = []
-    let waitForString = false
+
+    let step = 0
+    let name: string
 
     for (const { type, value } of tokens) {
-      if (waitForString && type === 'String') {
-        waitForString = false
-
-        // remove quotes
-        const filename = value.substring(1, value.length - 1)
-
-        result.push(new File(origin, filename, this.options.modulesDir))
-
-      } else if (type === 'Identifier' && value === 'require') {
-        waitForString = true
-      } else if (type === 'Keyword' && value === 'import') {
+      if (type === 'Keyword' && value === 'import') {
         throw new Error(`The import syntax is not supported! (${origin.path})`)
+      } else if (step === 0 && type === 'Identifier' && value === 'require') {
+        step += 1
+      } else if (step === 1 && type === 'Punctuator' && value === '(') {
+        step += 1
+      } else if (step === 2 && type === 'String') {
+        step += 1
+        // Temporarily store the filename.
+        name = value.substring(1, value.length - 1)
+      } else if (step === 3 && type === 'Punctuator' && value === ')') {
+        // The require statement is complete. Reset the step.
+        step = 0
+        // The require statement is valid. Store the result.
+        const fileHandle = new File(origin, name, this.options.modulesDir)
+        result.push(fileHandle)
+      } else {
+        step = 0
       }
     }
     return result
