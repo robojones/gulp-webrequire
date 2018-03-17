@@ -1,5 +1,6 @@
 import * as browserResolve from 'browser-resolve'
 import * as path from 'path'
+import { dirname } from 'path'
 import * as Vinyl from 'vinyl'
 
 const resolve = browserResolve.sync
@@ -7,6 +8,9 @@ const resolve = browserResolve.sync
 const MODULES = 'node_modules'
 
 export default class File {
+  /** A regexp that matches all path separators. */
+  public static sep = /[\\\/]/g
+
   /** The working directory of the origin file. */
   public cwd: string
 
@@ -57,7 +61,9 @@ export default class File {
   /** The absolute path to the file. */
   get resolved () {
     if (this.isModule) {
-      return resolve(this.mention)
+      return resolve(this.mention, {
+        basedir: dirname(this.origin)
+      })
     }
 
     let name = this.mention
@@ -75,7 +81,7 @@ export default class File {
 
   /** Is true if the mention does not start with "./" or "../" */
   get isModule () {
-    const first = this.mention.split(path.sep)[0]
+    const first = this.mention.split(File.sep)[0]
     return first !== '.' && first !== '..'
   }
 
@@ -101,7 +107,7 @@ export default class File {
     const resolved = this.resolved
 
     if (!resolved.startsWith(this.base)) {
-      throw new Error(`File is not in cwd! (${resolved})`)
+      throw new Error(`File (${resolved}) is not in cwd (${this.base})!`)
     }
 
     // Remove base and "/" in the beginning.

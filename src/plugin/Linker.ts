@@ -50,7 +50,9 @@ class Linker extends EventEmitter {
     this.queueLength += 1
 
     // Remove trailing slashes.
-    origin.base = path.join('/', ...origin.base.split(path.sep))
+    if (origin.base.endsWith('/') || origin.base.endsWith('\\')) {
+      origin.base = origin.base.substr(0, origin.base.length - 1)
+    }
 
     const requirements = this.parser.parse(origin)
 
