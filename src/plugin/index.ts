@@ -2,6 +2,10 @@ import * as fs from 'fs'
 import '../lib/logs'
 import Project, { ProjectOptions } from './Project'
 
+export {
+  Project
+}
+
 /**
  * Use require in the browser with this gulp plugin.
  * @example
@@ -9,6 +13,8 @@ import Project, { ProjectOptions } from './Project'
  *    .pipe(webrequire().through())
  *    .pipe(gulp.dest('build'))
  */
-export default function webrequire (options: ProjectOptions = {}): Project {
+export function webrequire (options: ProjectOptions = {}): Project {
   return new Project(options)
 }
+
+export default webrequire
