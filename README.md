@@ -15,7 +15,7 @@ npm install --save gulp-webrequire
 - Use __require__ in you client side javascript.
 - Require __NPM modules__.
 - Full __sourcemap__ support with [gulp-sourcemaps](https://npmjs.com/package/gulp-sourcemaps).
-- Dynamic package creation with __smark packing__.
+- Dynamic package creation with __smart packing__.
 - __Script tag__ generator.
 
 ## Table of contents
@@ -25,8 +25,8 @@ npm install --save gulp-webrequire
     - [Options](#options)
     - [Project#through](#projectthrough)
 - [How to find out what script tags need to be added to your HTML](#how-to-find-out-what-script-tags-need-to-be-added-to-your-html)
-  - [generateTags method](#setup-method)
-  - [setup method](#setup-method)
+  - [generateTags()](#setup)
+  - [setup()](#setup)
   - [Examples](#examples)
 
 ## How it works
@@ -36,22 +36,20 @@ Instead it detects the references between your modules and builds packages out o
 
 __Smart packing?__
 
-It is really nice, trust me! I am planning to write a small wiki page about it.
-
 The most important facts are:
-- Every module that is not required by any other module is considered an entry point. You can generate script tags by for entry points with the [api](#how-to-find-out-what-scripts-tags-need-to-be-added).
-- No module will be included multiple packs. --> All files can be cached by the browser and no module will be loaded twice.
+- Every module that is not required by any other module is considered an entry point. You can generate script tags for these entry points later on by using the [api](#how-to-find-out-what-script-tags-need-to-be-added).
+- No module will be included multiple packs. → All files can be cached by the browser and no module will be loaded twice.
 
 __So why should I use this?__
 
-The advantage of __not packing__ all your code into one big `.js` file is, that you can decide when a resource is loaded.
-So instead of downloading a whole bunch of JavaScript at once, where you only need a fraction of it, you can load only what's needed.
+The advantage of __not packing__ all your code into __one big `.js` file__ is, that you can decide when a resource is loaded.
+So instead of downloading a whole bunch of JavaScript, where you only need a fraction of it, you can load only what's needed.
 This lets you take advantage of the browser cache and improves your website performance.
 
 __How is this better than adding script-tags the old-fashioned way?__
 
 `gulp-webrequire` generates script tags with the `async` attribute.
-This will allow your script files to be loaded parallely.
+This will allow your JavaScript files to be loaded parallely.
 You don't need to worry about the order in which your scripts are executed - If one of your scripts requires another one,
 `gulp-webrequire` will make sure that the required file is executed first.
 It is also guaranteed that your scripts will be __executed after the "DOMContentLoaded" event__ was emitted.
@@ -100,10 +98,9 @@ const project = new Project(options)
 ```
 
 
-#### Options
-
-- __entryPoints__ `<string[]>` - Manually add entry points if they are not automatically detected. (In theory you will never have to use this)
-- __modulesDir___ `<string>` - Will be used in the sourcemaps as the directory that contains NPM modules that you use in your code. This is purely aesthetic. (Default: `modues/`)
+- options
+  - __entryPoints__ `<string[]>` - Manually add entry points if they are not automatically detected. (In theory you will never have to use this)
+  - __modulesDir___ `<string>` - Will be used in the sourcemaps as the directory that contains NPM modules that you use in your code. This is purely aesthetic. (Default: `modues/`)
 
 ### Project#through()
 This method returns a stream that you can use in your gulp task to pipe files through. You **must** create a new stream for each gulp task.
@@ -136,7 +133,7 @@ The generateTags method will find all js files that are being imported in the `l
 It will then return HTML script tags for these files as one big string.
 Your can use the returned string to render it into your website's HTML.
 
-### generateTags method
+### generateTags()
 
 This method allows you to generate scripttags for all files that are related to an entry point.
 
@@ -151,15 +148,12 @@ generateTags(entryPoint, options)
   - tagGenerator `<function>` - A function that receives a path and generates a script-tag for it. The path is relative to the base directory and does not begin with a `/`.
   - cache `<boolean>` - Gulp-webrequire will cache which files are in which packs. To disable this behaviour you can set this option to false. (default: `true`)
 
-### setup method
+### setup()
+
+With this method you can change default options for the generateTags method.
 
 ```javascript
 const { setup } = require('gulp-webrequire')
-```
-
-With this method you can change the default options for the generateTags method.
-
-```
 setup (options)
 ```
 
