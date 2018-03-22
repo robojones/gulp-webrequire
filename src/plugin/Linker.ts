@@ -140,7 +140,7 @@ class Linker extends EventEmitter {
       }
       file.isDir = false
 
-
+      log('Files:', this.paths)
       throw new Error(`File "${file.resolved}" not found. Please make sure that you pass all files to the project.`)
     }
   }
