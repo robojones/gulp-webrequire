@@ -25,7 +25,7 @@ npm install --save gulp-webrequire
     - [Options](#options)
     - [Project#through](#projectthrough)
 - [How to find out what script tags need to be added to your HTML](#how-to-find-out-what-script-tags-need-to-be-added-to-your-html)
-  - [generateTags()](#setup)
+  - [generateTags()](#generatetags)
   - [setup()](#setup)
   - [Examples](#examples)
 
@@ -154,10 +154,10 @@ With this method you can change default options for the generateTags method.
 
 ```javascript
 const { setup } = require('gulp-webrequire')
-setup (options)
+setup(options)
 ```
 
-- options - The same ones that your can set in the [generateTags](#generatetags-method) method.
+- options - The same ones that your can set in the [generateTags](#generatetags) method.
 
 ### Examples
 
